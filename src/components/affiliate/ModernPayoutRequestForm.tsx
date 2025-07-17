@@ -337,17 +337,42 @@ const ModernPayoutRequestForm = () => {
                     )}
                   />
            
+           {/* Tax calculation display for all payment methods */}
+           {watchAmount && Number(watchAmount) > 0 && (
+             <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-100 mb-4">
+               <h4 className="font-medium text-yellow-800 mb-2 flex items-center">
+                 <Info className="w-4 h-4 mr-2" />
+                 Detail Pemotongan Pajak
+               </h4>
+               
+               <div className="space-y-2">
+                 <div className="flex justify-between">
+                   <span className="text-yellow-700">Jumlah Bruto:</span>
+                   <span className="font-medium text-yellow-800">¥{grossAmount.toLocaleString()}</span>
+                 </div>
+                 <div className="flex justify-between">
+                   <span className="text-yellow-700">Pajak (10%):</span>
+                   <span className="font-medium text-red-600">-¥{taxAmount.toLocaleString()}</span>
+                 </div>
+                 <div className="flex justify-between border-t border-yellow-200 pt-2">
+                   <span className="text-yellow-700 font-medium">Jumlah Bersih Diterima:</span>
+                   <span className="font-bold text-green-600">¥{netAmount.toLocaleString()}</span>
+                 </div>
+               </div>
+               
+               <div className="mt-3 p-2 bg-yellow-100 rounded text-xs text-yellow-700">
+                 <strong>Catatan:</strong> Pajak 10% dipotong dari semua pencairan komisi sesuai peraturan pajak Jepang
+               </div>
+             </div>
+           )}
+
            {/* Currency conversion info for Indonesian Rupiah transfers */}
-           {watchMethod === 'Transfer Bank Rupiah (Indonesia)' && watchAmount && (
+           {watchMethod === 'Transfer Bank Rupiah (Indonesia)' && watchAmount && Number(watchAmount) > 0 && (
              <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
                <h4 className="font-medium text-blue-800 mb-2 flex items-center">
                  <Info className="w-4 h-4 mr-2" />
                  Konversi Mata Uang
                </h4>
-               
-               <div className="mb-3 p-2 bg-blue-100 rounded text-xs text-blue-700">
-                 <strong>Penting:</strong> Konversi dilakukan pada jumlah bersih setelah pajak (¥{netAmount.toLocaleString()})
-               </div>
                
                <div className="flex justify-between items-center mb-2">
                  <div className="flex items-center">
@@ -358,7 +383,7 @@ const ModernPayoutRequestForm = () => {
                      </div>
                    ) : (
                      <span className="font-bold text-blue-700 text-xl">
-                       Rp {convertedRupiah?.toLocaleString('id-ID') || '-'}
+                       Rp {convertedRupiah?.toLocaleString('id-ID') || '-'} (jumlah bersih)
                      </span>
                    )}
                  </div>
@@ -377,7 +402,7 @@ const ModernPayoutRequestForm = () => {
                {lastUpdated && (
                  <p className="text-xs text-blue-600 flex items-center mb-3">
                    <Info className="w-3 h-3 mr-1" />
-                   Kurs otomatis untuk jumlah bersih, diperbarui pada {lastUpdated}
+                   Kurs otomatis untuk jumlah bersih setelah pajak, diperbarui pada {lastUpdated}
                  </p>
                )}
                
@@ -388,6 +413,10 @@ const ModernPayoutRequestForm = () => {
                    </AlertDescription>
                  </Alert>
                )}
+               
+               <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-700">
+                 <strong>Konversi:</strong> Jumlah bersih ¥{netAmount.toLocaleString()} dikonversi ke Rupiah menggunakan kurs real-time
+               </div>
              </div>
            )}
 
