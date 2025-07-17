@@ -27,37 +27,14 @@ const STORAGE_FOLDER = 'product-images';
 
 export const getCategories = async (): Promise<string[]> => {
   try {
-    const productsRef = collection(db, PRODUCTS_COLLECTION);
-    const snapshot = await getDocs(productsRef);
-    
-    const categories = new Set<string>();
-    snapshot.docs.forEach(doc => {
-      const product = doc.data() as Product;
-      if (product.category) {
-        // Map legacy categories to new simplified categories
-        const mappedCategory = mapLegacyCategory(product.category);
-        categories.add(mappedCategory);
-      }
-    });
-    
-    return Array.from(categories);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
-};
-
-// Get all categories (for backward compatibility)
-export const getCategories = async (): Promise<string[]> => {
-  try {
     // First try to get categories from the categories collection
     const categories = await getAllCategories();
     if (categories.length > 0) {
       return categories.map(category => category.name);
     }
     
-    // Fallback to extracting categories from products
-    return getCategories();
+    // Fallback to default categories if there's an error
+    return ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
   } catch (error) {
     console.error('Error fetching categories:', error);
     // Return default categories if there's an error
