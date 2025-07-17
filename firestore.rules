@@ -69,9 +69,9 @@ service cloud.firestore {
       allow update, delete: if request.auth != null;
     }
     
-    // Allow anyone to read categories
+    // Allow anyone to read categories with explicit permissions
     match /categories/{categoryId} {
-      allow read, list: if true;
+      allow get, list, read: if true;
       allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
