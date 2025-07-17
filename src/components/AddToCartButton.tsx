@@ -62,6 +62,7 @@ const AddToCartButton = ({
       });
     }
 
+    setLoading(true);
     addToCart(product, quantity);
     
     // Show success state
@@ -75,11 +76,11 @@ const AddToCartButton = ({
       duration: 3000,
       action: (
         <button 
-    setLoading(true);
           onClick={() => window.location.href = '/cart'}
         >
           {t('cart.viewCart')}
         </button>
+      )
     });
   };
 
@@ -89,8 +90,7 @@ const AddToCartButton = ({
     <motion.button
       ref={buttonRef}
       onClick={handleAddToCart}
-      disabled={isOutOfStock || disabled}
-      disabled={loading}
+      disabled={isOutOfStock || disabled || loading}
       className={`
         ${className}
         ${isOutOfStock 
