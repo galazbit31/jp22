@@ -287,3 +287,5 @@ export const getCategoriesWithProductCounts = async () => {
     throw error;
   }
 };
+
+export { initializeDefaultCategories }
