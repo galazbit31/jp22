@@ -50,33 +50,68 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('common.error')}</h2>
-          <p className="text-gray-600 mb-4">{t('common.loadingError')}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90"
-          >
-            {t('common.refresh')}
-          </button>
-        </div>
+        <ErrorState 
+          title={t('common.error')}
+          message={t('common.loadingError')}
+          onRetry={() => window.location.reload()}
+        />
         <Footer />
       </div>
     );
   }
 
-  // Show loading only if products are still loading
+  // Show loading with modern loader
   if (productsLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('products.loading')}</p>
+        <div className="min-h-screen bg-gray-50">
+          {/* Hero Section Skeleton */}
+          <section className="bg-gradient-to-br from-red-600 via-red-700 to-orange-600 text-white w-full">
+            <div className="container mx-auto px-4 py-12 sm:py-16 md:py-20 lg:py-24">
+              <div className="max-w-4xl mx-auto text-center">
+                <Skeleton className="h-12 sm:h-16 md:h-20 w-3/4 mx-auto mb-6 bg-white/20" />
+                <Skeleton className="h-6 sm:h-8 w-2/3 mx-auto mb-8 bg-white/20" />
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Skeleton className="h-12 w-48 bg-white/20" />
+                  <Skeleton className="h-12 w-48 bg-white/20" />
+                </div>
+              </div>
+            </div>
+          </section>
+          
+          {/* Categories Section Skeleton */}
+          <section className="py-12 sm:py-16 bg-gray-50 w-full">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-8 sm:mb-12">
+                <Skeleton className="h-8 w-64 mx-auto mb-4" />
+                <Skeleton className="h-6 w-96 mx-auto" />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 max-w-6xl mx-auto">
+                {Array(6).fill(0).map((_, index) => (
+                  <CategoryCardSkeleton key={index} />
+                ))}
+              </div>
+            </div>
+          </section>
+          
+          {/* Featured Products Section Skeleton */}
+          <section className="py-12 sm:py-16 bg-white w-full">
+            <div className="container mx-auto px-4">
+              <div className="text-center mb-8 sm:mb-12">
+                <Skeleton className="h-8 w-64 mx-auto mb-4" />
+                <Skeleton className="h-6 w-96 mx-auto" />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto mb-8 sm:mb-12">
+                {Array(8).fill(0).map((_, index) => (
+                  <ProductCardSkeleton key={index} />
+                ))}
+              </div>
+            </div>
+          </section>
         </div>
         <Footer />
-      </div>
+      </>
     );
   }
 

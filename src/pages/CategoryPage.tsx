@@ -11,6 +11,7 @@ import FlyingProductAnimation from '@/components/FlyingProductAnimation';
 import { Product } from '@/types';
 import { getCategoryIcon, getCategoryTranslation, getCategoryUrlPath } from '@/utils/categoryVariants';
 import { getAllCategories } from '@/services/categoryService';
+import { ProductCardSkeleton, ErrorState } from '@/components/ui/loading';
 
 const CategoryPage = () => {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -67,30 +68,34 @@ const CategoryPage = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('common.error')}</h2>
-          <p className="text-gray-600 mb-4">{t('common.loadingError')}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90"
-          >
-            {t('common.refresh')}
-          </button>
-        </div>
+        <ErrorState 
+          title={t('common.error')}
+          message={t('common.loadingError')}
+          onRetry={() => window.location.reload()}
+        />
         <Footer />
       </div>
     );
   }
 
-  // Show loading state
+  // Show loading state with skeleton
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('products.loading')}</p>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-12">
+            <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4 animate-pulse"></div>
+            <div className="h-10 bg-gray-200 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-6 bg-gray-200 rounded w-96 mx-auto animate-pulse"></div>
+          </div>
+
+          {/* Products Grid Skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6 px-4">
+            {Array(8).fill(0).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
         </div>
         <Footer />
       </div>

@@ -39,6 +39,7 @@ interface CheckoutFormProps {
   total: number;
   onOrderComplete: () => void;
 }
+import { ButtonSpinner } from '@/components/ui/loading';
 
 export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -598,6 +599,7 @@ Mohon konfirmasi pesanan saya. Terima kasih banyak!`;
               disabled={isSubmitting || cart.length === 0 || (selectedPrefecture && shippingFee === null)}
               className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-lg font-semibold flex items-center justify-center space-x-2"
             >
+              {isSubmitting && <ButtonSpinner />}
               <MessageCircle className="w-5 h-5" />
               <span>
                 {isSubmitting ? t('checkout.processing') : t('checkout.orderViaWhatsApp')}

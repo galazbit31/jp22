@@ -15,6 +15,7 @@ import { ProductVariant } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { getCategoryIcon, getCategoryTranslation } from '@/utils/categoryVariants';
 import VariantSelectionPopup from '@/components/VariantSelectionPopup';
+import { Skeleton, ErrorState } from '@/components/ui/loading';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -179,9 +180,60 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header shouldAnimateCart={shouldAnimateCart} />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat produk...</p>
+        <div className="container mx-auto px-4 py-8">
+          {/* Breadcrumb Skeleton */}
+          <div className="flex space-x-2 text-sm mb-8">
+            <Skeleton className="h-4 w-16" />
+            <span>/</span>
+            <Skeleton className="h-4 w-20" />
+            <span>/</span>
+            <Skeleton className="h-4 w-32" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+            {/* Image Skeleton */}
+            <div className="space-y-4">
+              <Skeleton className="w-full h-96 rounded-lg" />
+            </div>
+
+            {/* Product Info Skeleton */}
+            <div className="space-y-6">
+              <div>
+                <Skeleton className="h-6 w-32 mb-3" />
+                <Skeleton className="h-8 w-3/4 mb-4" />
+                <Skeleton className="h-10 w-40 mb-6" />
+              </div>
+
+              <div>
+                <Skeleton className="h-6 w-48 mb-3" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/5" />
+                </div>
+              </div>
+
+              <div>
+                <Skeleton className="h-6 w-32 mb-3" />
+                <Skeleton className="h-8 w-48" />
+              </div>
+
+              <div>
+                <Skeleton className="h-6 w-24 mb-3" />
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="h-12 w-32" />
+                  <Skeleton className="h-6 w-40" />
+                </div>
+              </div>
+
+              <Skeleton className="w-full h-12 rounded-xl" />
+
+              <div className="grid grid-cols-2 gap-4 pt-6">
+                <Skeleton className="h-24 rounded-xl" />
+                <Skeleton className="h-24 rounded-xl" />
+              </div>
+            </div>
+          </div>
         </div>
         <Footer />
       </div>
@@ -192,13 +244,11 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <div className="text-6xl mb-4">😵</div>
-          <h1 className="text-2xl font-bold mb-4">Produk Tidak Ditemukan</h1>
-          <Link to="/products" className="btn-primary">
-            Kembali ke Katalog
-          </Link>
-        </div>
+        <ErrorState 
+          title="Produk Tidak Ditemukan"
+          message="Produk yang Anda cari tidak tersedia"
+          onRetry={() => navigate('/products')}
+        />
         <Footer />
       </div>
     );
