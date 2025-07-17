@@ -90,6 +90,12 @@ service cloud.firestore {
       allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
+    // Allow anyone to read categories
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
+    }
+    
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && 
