@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useQuery } from '@tanstack/react-query';
 import { useCartAnimation } from '@/hooks/useCartAnimation';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
@@ -9,6 +10,7 @@ import Footer from '@/components/Footer';
 import FlyingProductAnimation from '@/components/FlyingProductAnimation';
 import { Product } from '@/types';
 import { getCategoryIcon, getCategoryTranslation } from '@/utils/categoryVariants';
+import { getAllCategories } from '@/services/categoryService';
 
 interface CategoryPageProps {
   category: string;
@@ -17,6 +19,10 @@ interface CategoryPageProps {
 const CategoryPage = ({ category }: CategoryPageProps) => {
   const { data: products = [], isLoading, isError } = useProducts();
   const { t, language } = useLanguage();
+  const { data: categoriesData = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getAllCategories
+  });
   const navigate = useNavigate();
   
   const {
@@ -30,12 +36,18 @@ const CategoryPage = ({ category }: CategoryPageProps) => {
   } = useCartAnimation();
 
   // Filter products by the specified category
-  const categoryProducts = products.filter(product => product.category === category);
+  const categoryProducts = products.filter(product => product.category === categoryName);
 
   // Enhanced scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [category]);
+
+  // Find category object if it exists in categoriesData
+  const categoryObj = categoriesData.find(c => c.name === category || c.slug === category);
+  const categoryName = categoryObj?.name || category;
+  const categoryIcon = categoryObj?.icon || getCategoryIcon(category);
+  const categoryDescription = categoryObj?.description || '';
 
   const handleAddToCart = (product: Product, position: { x: number; y: number }) => {
     // Get cart icon position (approximate)
@@ -97,14 +109,18 @@ const CategoryPage = ({ category }: CategoryPageProps) => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <div className="text-4xl mb-4">{getCategoryIcon(category)}</div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">{getCategoryTranslation(category, language)}</h1>
-          <p className="text-xl text-gray-600">
-            {language === 'en' 
-              ? `Find your favorite ${getCategoryTranslation(category, language).toLowerCase()} products`
-              : `Temukan produk ${category.toLowerCase()} favorit Anda`
-            }
-          </p>
+          <div className="text-4xl mb-4">{categoryIcon}</div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{getCategoryTranslation(categoryName, language)}</h1>
+          {categoryDescription ? (
+            <p className="text-xl text-gray-600">{categoryDescription}</p>
+          ) : (
+            <p className="text-xl text-gray-600">
+              {language === 'en' 
+                ? `Find your favorite ${getCategoryTranslation(categoryName, language).toLowerCase()} products`
+                : `Temukan produk ${categoryName.toLowerCase()} favorit Anda`
+              }
+            </p>
+          )}
         </div>
 
         {/* Products Grid */}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProduct } from '@/hooks/useProducts';
 import { toast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,8 +14,8 @@ import { Link } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useQueryClient } from '@tanstack/react-query';
 import ProductVariants from '@/components/admin/ProductVariants';
-import { updateProduct, uploadProductImages } from '@/services/productService';
-import { getCategoriesWithVariants, getCategoryIcon } from '@/utils/categoryVariants';
+import { updateProduct, uploadProductImages, getCategories } from '@/services/productService';
+import { getAllCategories } from '@/services/categoryService';
 
 const EditProduct = () => {
   const { id } = useParams<{ id: string }>();
@@ -33,8 +34,16 @@ const EditProduct = () => {
     stock: ''
   });
   const [variants, setVariants] = useState([]);
+  const { data: categoriesData = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getAllCategories
+  });
 
-  const categories = getCategoriesWithVariants();
+  // Combine database categories with hardcoded categories for backward compatibility
+  const legacyCategories = ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
+  const categories = categoriesLoading 
+    ? legacyCategories 
+    : [...new Set([...categoriesData.map(c => c.name), ...legacyCategories])];
 
   useEffect(() => {
     if (product) {
@@ -353,7 +362,7 @@ const EditProduct = () => {
                 <div className="border-t pt-6">
                   <ProductVariants
                     category={formData.category}
-                    variants={variants}
+                    variants={variants || []}
                     onChange={setVariants}
                   />
                 </div>
@@ -363,22 +372,35 @@ const EditProduct = () => {
                   {existingImages.length > 0 && (
                     <div className="mt-2 mb-4">
                       <div className="grid grid-cols-3 gap-4">
-                        {existingImages.map((imageUrl, index) => (
+                        {existingImages && existingImages.map((imageUrl, index) => (
                           <div key={index} className="relative">
                             <img 
                               src={imageUrl} 
                               alt={`Existing ${index + 1}`} 
                               className="w-full h-24 object-cover rounded-lg border"
                             />
-                            <button
-                              type="button"
-                              onClick={() => removeExistingImage(index)}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
+                      <SelectContent className="max-h-[300px]">
+                        {categoriesLoading ? (
+                          <div className="p-2 text-center">
+                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full inline-block mr-2"></div>
+                            <span>Loading categories...</span>
                           </div>
-                        ))}
+                        ) : (
+                          categories.map((category) => {
+                            // Find category object if it exists in categoriesData
+                            const categoryObj = categoriesData.find(c => c.name === category);
+                            const icon = categoryObj?.icon || '📦';
+                            
+                            return (
+                              <SelectItem key={category} value={category}>
+                                <div className="flex items-center space-x-2">
+                                  <span>{icon}</span>
+                                  <span>{category}</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          })
+                        )}
                       </div>
                     </div>
                   )}
@@ -399,9 +421,9 @@ const EditProduct = () => {
                     
                     {newImagePreviews.length > 0 && (
                       <div className="mt-4">
-                        <p className="text-sm text-gray-600 mb-2">Preview Foto Baru:</p>
+                        <p className="text-sm text-gray-600 mb-2">Preview Gambar Baru:</p>
                         <div className="grid grid-cols-3 gap-4">
-                          {newImagePreviews.map((preview, index) => (
+                          {newImagePreviews && newImagePreviews.map((preview, index) => (
                             <div key={index} className="relative">
                               <img 
                                 src={preview} 

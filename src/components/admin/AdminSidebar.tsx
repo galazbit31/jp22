@@ -1,7 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Package, 
+  Package,
+  Tags,
   ShoppingCart, 
   Users, 
   CheckCircle,
@@ -48,6 +49,12 @@ const AdminSidebar = () => {
       title: 'Tambah Produk',
       href: '/admin/add-product',
       icon: Package,
+    },
+    {
+      title: 'Manajemen Kategori',
+      href: '/admin/categories',
+      icon: Tags,
+      description: 'Kelola kategori produk'
     },
     {
       title: 'Riwayat Pesanan',

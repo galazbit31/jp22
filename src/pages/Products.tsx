@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCartAnimation } from '@/hooks/useCartAnimation';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useQuery } from '@tanstack/react-query';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FlyingProductAnimation from '@/components/FlyingProductAnimation';
 import { Product } from '@/types';
-import { getCategoriesWithVariants, getCategoryIcon } from '@/utils/categoryVariants';
+import { getCategoryIcon } from '@/utils/categoryVariants';
+import { getAllCategories } from '@/services/categoryService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Products = () => {
@@ -26,12 +28,22 @@ const Products = () => {
     resetAnimation
   } = useCartAnimation();
 
+  // Fetch categories from database
+  const { data: categoriesData = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getAllCategories
+  });
+
+  // Combine database categories with hardcoded categories for backward compatibility
+  const legacyCategories = ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
+  const allCategoryNames = categoriesLoading 
+    ? legacyCategories 
+    : [...new Set([...categoriesData.map(c => c.name), ...legacyCategories])];
+
   // Enhanced scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
-
-  const categories = getCategoriesWithVariants();
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,15 +138,33 @@ const Products = () => {
                 <SelectValue placeholder="Pilih kategori" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('categories.all')}</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    <div className="flex items-center space-x-2">
-                      <span>{getCategoryIcon(category)}</span>
-                      <span>{category}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                <SelectItem value="all">
+                  <div className="flex items-center space-x-2">
+                    <span>🔍</span>
+                    <span>{t('categories.all')}</span>
+                  </div>
+                </SelectItem>
+                {categoriesLoading ? (
+                  <div className="p-2 text-center">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full inline-block mr-2"></div>
+                    <span>Loading categories...</span>
+                  </div>
+                ) : (
+                  allCategoryNames.map(category => {
+                    // Find category object if it exists in categoriesData
+                    const categoryObj = categoriesData.find(c => c.name === category);
+                    const icon = categoryObj?.icon || getCategoryIcon(category);
+                    
+                    return (
+                      <SelectItem key={category} value={category}>
+                        <div className="flex items-center space-x-2">
+                          <span>{icon}</span>
+                          <span>{category}</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -143,29 +173,38 @@ const Products = () => {
         {/* Category Pills */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
-            onClick={() => setSelectedCategory('all')}
+            onClick={() => setSelectedCategory('all')} 
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               selectedCategory === 'all' 
                 ? 'bg-primary text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Semua
+            <span className="flex items-center space-x-1">
+              <span>🔍</span>
+              <span>Semua</span>
+            </span>
           </button>
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center space-x-1 ${
-                selectedCategory === category 
-                  ? 'bg-primary text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span>{getCategoryIcon(category)}</span>
-              <span>{category}</span>
-            </button>
-          ))}
+          {!categoriesLoading && allCategoryNames.map(category => {
+            // Find category object if it exists in categoriesData
+            const categoryObj = categoriesData.find(c => c.name === category);
+            const icon = categoryObj?.icon || getCategoryIcon(category);
+            
+            return (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center space-x-1 ${
+                  selectedCategory === category 
+                    ? 'bg-primary text-white' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span>{icon}</span>
+                <span>{category}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Products Grid */}

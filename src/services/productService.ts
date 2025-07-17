@@ -19,6 +19,7 @@ import {
 import { db, storage, auth } from '@/config/firebase';
 import { Product, RecycleBinItem } from '@/types';
 import { mapLegacyCategory } from '@/utils/categoryVariants';
+import { getAllCategories } from '@/services/categoryService';
 
 const PRODUCTS_COLLECTION = 'products';
 const RECYCLE_BIN_COLLECTION = 'recycle_bin';
@@ -43,6 +44,24 @@ export const getCategories = async (): Promise<string[]> => {
   } catch (error) {
     console.error('Error fetching categories:', error);
     throw error;
+  }
+};
+
+// Get all categories (for backward compatibility)
+export const getCategories = async (): Promise<string[]> => {
+  try {
+    // First try to get categories from the categories collection
+    const categories = await getAllCategories();
+    if (categories.length > 0) {
+      return categories.map(category => category.name);
+    }
+    
+    // Fallback to extracting categories from products
+    return getCategories();
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    // Return default categories if there's an error
+    return ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
   }
 };
 

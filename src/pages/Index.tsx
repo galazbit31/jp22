@@ -5,14 +5,27 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useProducts } from '@/hooks/useProducts';
 import { useLanguage } from '@/hooks/useLanguage';
-import { getCategoriesWithVariants, getCategoryIcon, getCategoryUrlPath, getCategoryTranslation } from '@/utils/categoryVariants';
+import { useQuery } from '@tanstack/react-query';
+import { getCategoryIcon, getCategoryUrlPath, getCategoryTranslation } from '@/utils/categoryVariants';
+import { getAllCategories } from '@/services/categoryService';
 
 const Index = () => {
   const { data: products = [], isLoading: productsLoading, isError: productsError } = useProducts();
   const { t, language } = useLanguage();
-  const categories = getCategoriesWithVariants();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Fetch categories from database
+  const { data: categoriesData = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getAllCategories
+  });
+
+  // Combine database categories with hardcoded categories for backward compatibility
+  const legacyCategories = ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
+  const categories = categoriesLoading 
+    ? legacyCategories 
+    : [...new Set([...categoriesData.map(c => c.name), ...legacyCategories])];
 
   // Check for referral code in URL and redirect to registration
   useEffect(() => {
@@ -111,20 +124,37 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 max-w-6xl mx-auto">
-            {categories.map((category) => (
-              <Link
-                key={category}
-                to={`/kategori/${getCategoryUrlPath(category)}`}
-                className="bg-white hover:bg-red-50 hover:border-red-200 p-4 sm:p-6 rounded-xl text-center transition-all duration-200 transform hover:scale-105 border border-gray-100 shadow-sm group"
-              >
-                <div className="text-2xl sm:text-3xl mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-200">
-                  {getCategoryIcon(category)}
+            {categoriesLoading ? (
+              // Show loading skeletons for categories
+              Array(6).fill(0).map((_, index) => (
+                <div key={index} className="bg-white p-4 sm:p-6 rounded-xl text-center border border-gray-100 shadow-sm animate-pulse">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full mx-auto mb-2 sm:mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
                 </div>
-                <h3 className="font-semibold text-gray-800 text-xs sm:text-sm leading-tight group-hover:text-red-600 transition-colors">
-                  {getCategoryTranslation(category, language)}
-                </h3>
-              </Link>
-            ))}
+              ))
+            ) : (
+              categories.map((category) => {
+                // Find category object if it exists in categoriesData
+                const categoryObj = categoriesData.find(c => c.name === category);
+                const icon = categoryObj?.icon || getCategoryIcon(category);
+                const slug = categoryObj?.slug || getCategoryUrlPath(category);
+                
+                return (
+                  <Link
+                    key={category}
+                    to={`/kategori/${slug}`}
+                    className="bg-white hover:bg-red-50 hover:border-red-200 p-4 sm:p-6 rounded-xl text-center transition-all duration-200 transform hover:scale-105 border border-gray-100 shadow-sm group"
+                  >
+                    <div className="text-2xl sm:text-3xl mb-2 sm:mb-3 group-hover:scale-110 transition-transform duration-200">
+                      {icon}
+                    </div>
+                    <h3 className="font-semibold text-gray-800 text-xs sm:text-sm leading-tight group-hover:text-red-600 transition-colors">
+                      {getCategoryTranslation(category, language)}
+                    </h3>
+                  </Link>
+                );
+              })
+            )}
           </div>
         </div>
       </section>

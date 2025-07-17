@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useFirebaseAuth';
 import { toast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +13,8 @@ import { Save, ArrowLeft, X, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ProductVariants from '@/components/admin/ProductVariants';
-import { addProduct, uploadProductImages } from '@/services/productService';
-import { getCategoriesWithVariants, getCategoryIcon } from '@/utils/categoryVariants';
+import { addProduct, uploadProductImages, getCategories } from '@/services/productService';
+import { getAllCategories } from '@/services/categoryService';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -29,8 +30,16 @@ const AddProduct = () => {
     stock: ''
   });
   const [variants, setVariants] = useState([]);
+  const { data: categoriesData = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getAllCategories
+  });
 
-  const categories = getCategoriesWithVariants();
+  // Combine database categories with hardcoded categories for backward compatibility
+  const legacyCategories = ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
+  const categories = categoriesLoading 
+    ? legacyCategories 
+    : [...new Set([...categoriesData.map(c => c.name), ...legacyCategories])];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -263,15 +272,28 @@ const AddProduct = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih kategori" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          <div className="flex items-center space-x-2">
-                            <span>{getCategoryIcon(category)}</span>
-                            <span>{category}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                    <SelectContent className="max-h-[300px]">
+                      {categoriesLoading ? (
+                        <div className="p-2 text-center">
+                          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full inline-block mr-2"></div>
+                          <span>Loading categories...</span>
+                        </div>
+                      ) : (
+                        categories.map((category) => {
+                          // Find category object if it exists in categoriesData
+                          const categoryObj = categoriesData.find(c => c.name === category);
+                          const icon = categoryObj?.icon || '📦';
+                          
+                          return (
+                            <SelectItem key={category} value={category}>
+                              <div className="flex items-center space-x-2">
+                                <span>{icon}</span>
+                                <span>{category}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -312,7 +334,7 @@ const AddProduct = () => {
                 <div className="border-t pt-6">
                   <ProductVariants
                     category={formData.category}
-                    variants={variants}
+                    variants={variants || []}
                     onChange={setVariants}
                   />
                 </div>
@@ -336,7 +358,7 @@ const AddProduct = () => {
                       <div className="mt-4">
                         <p className="text-sm text-gray-600 mb-2">Preview ({imagePreviews.length} gambar):</p>
                         <div className="grid grid-cols-3 gap-4">
-                          {imagePreviews.map((preview, index) => (
+                          {imagePreviews && imagePreviews.map((preview, index) => (
                             <div key={index} className="relative">
                               <img 
                                 src={preview} 
