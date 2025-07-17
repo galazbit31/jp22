@@ -92,7 +92,7 @@ service cloud.firestore {
     
     // Allow anyone to read categories
     match /categories/{categoryId} {
-      allow read: if true;
+      allow read, list: if true;
       allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
