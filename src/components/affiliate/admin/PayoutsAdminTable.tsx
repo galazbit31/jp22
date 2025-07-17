@@ -276,13 +276,13 @@ const PayoutsAdminTable = () => {
                                   onChange={(e) => setNotes(e.target.value)}
                                   placeholder="Masukkan catatan jika diperlukan"
                                   className="mt-2"
-                                  {selectedPayout.bankInfo.currency === 'IDR' && selectedPayout.bankInfo.estimatedAmount && (
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Estimasi Rupiah:</span>
-                                      <span>Rp {selectedPayout.bankInfo.estimatedAmount.toLocaleString('id-ID')}</span>
-                                    </div>
-                                  )}
                                 />
+                                {selectedPayout && selectedPayout.bankInfo && selectedPayout.bankInfo.currency === 'IDR' && selectedPayout.bankInfo.estimatedAmount && (
+                                  <div className="flex justify-between mt-2">
+                                    <span className="text-gray-600">Estimasi Rupiah:</span>
+                                    <span>Rp {selectedPayout.bankInfo.estimatedAmount.toLocaleString('id-ID')}</span>
+                                  </div>
+                                )}
                               </div>
                               <AlertDialogFooter>
                                 <AlertDialogCancel onClick={() => {
