@@ -138,14 +138,7 @@ const AddToCartButton = ({
                 >
                   <Plus className="w-0.5 h-0.5 text-red-600" strokeWidth={4} />
                 </motion.div>
-              {isOutOfStock ? t('products.outOfStock') : 
-               isAdded ? '✓ Ditambahkan' : 
-               loading ? (
-                 <div className="flex items-center">
-                   <ButtonSpinner />
-                   <span>Adding...</span>
-                 </div>
-               ) : t('buttons.addToCart')}
+              )}
             </div>
           )}
         </motion.div>
@@ -158,7 +151,14 @@ const AddToCartButton = ({
           } : {}}
           transition={{ duration: 0.3 }}
         >
-          {isOutOfStock ? t('products.outOfStock') : isAdded ? '✓ Ditambahkan' : t('buttons.addToCart')}
+          {isOutOfStock ? t('products.outOfStock') : 
+           isAdded ? '✓ Ditambahkan' : 
+           loading ? (
+             <div className="flex items-center">
+               <ButtonSpinner />
+               <span>Adding...</span>
+             </div>
+           ) : t('buttons.addToCart')}
         </motion.span>
       </motion.div>
 
