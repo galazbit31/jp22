@@ -77,7 +77,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-110"
           />
           <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-            <Badge className="flex items-center space-x-1 bg-white/80 backdrop-blur-sm">
+            <Badge className="flex items-center space-x-1 bg-white text-gray-800 shadow-sm border border-gray-200">
               <span className="text-base">{getCategoryIcon(product.category)}</span>
               <span>{getCategoryTranslation(product.category, language)}</span>
             </Badge>
