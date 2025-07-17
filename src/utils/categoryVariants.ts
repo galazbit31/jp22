@@ -198,7 +198,11 @@ export const getCategoryTranslation = (category: string, language: string): stri
     'Sayur & Bahan Segar': 'Fresh Vegetables & Ingredients',
     'Sayur Beku': 'Frozen Vegetables',
     'Sayur Segar/Beku': 'Fresh/Frozen Vegetables',
-    'Bon Cabe': 'Bon Cabe Chili Flakes'
+    'Bon Cabe': 'Bon Cabe Chili Flakes',
+    'Minuman': 'Beverages',
+    'Rempah Instan': 'Instant Spices',
+    'Obat-obatan': 'Medicines',
+    'Elektronik': 'Electronics'
   };
   
   // Return translated category name if language is English and translation exists
