@@ -8,7 +8,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { useQuery } from '@tanstack/react-query';
 import { getCategoryIcon, getCategoryUrlPath, getCategoryTranslation } from '@/utils/categoryVariants';
 import { getAllCategories } from '@/services/categoryService';
-
+import { Skeleton, ProductCardSkeleton, CategoryCardSkeleton, ErrorState } from '@/components/ui/loading';
 const Index = () => {
   const { data: products = [], isLoading: productsLoading, isError: productsError } = useProducts();
   const { t, language } = useLanguage();

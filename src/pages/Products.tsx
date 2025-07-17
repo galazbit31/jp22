@@ -11,7 +11,7 @@ import { Product } from '@/types';
 import { getCategoryIcon } from '@/utils/categoryVariants';
 import { getAllCategories } from '@/services/categoryService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ProductCardSkeleton, ErrorState } from '@/components/ui/loading';
+import { Skeleton, ProductCardSkeleton, ErrorState } from '@/components/ui/loading';
 
 const Products = () => {
   const { data: products = [], isLoading, isError, error } = useProducts();
