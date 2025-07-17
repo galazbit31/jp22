@@ -97,13 +97,7 @@ function App() {
             <Route path="/how-to-buy" element={<HowToBuy />} />
             
             {/* Category routes */}
-            <Route path="/kategori/makanan-ringan" element={<CategoryPage category="Makanan Ringan" />} />
-            <Route path="/kategori/bumbu-dapur" element={<CategoryPage category="Bumbu Dapur" />} />
-            <Route path="/kategori/makanan-siap-saji" element={<CategoryPage category="Makanan Siap Saji" />} />
-            <Route path="/kategori/sayur-bahan-segar" element={<CategoryPage category="Sayur & Bahan Segar" />} />
-            <Route path="/kategori/bahan-masak-beku" element={<CategoryPage category="Bahan Masak Beku" />} />
-            <Route path="/kategori/sayur-bumbu" element={<CategoryPage category="Sayur & Bumbu" />} />
-            <Route path="/kategori/kerupuk" element={<CategoryPage category="Kerupuk" />} />
+            <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
             
             {/* Admin routes */}
             <Route path="/admin" element={<Admin />} />

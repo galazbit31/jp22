@@ -12,11 +12,8 @@ import { Product } from '@/types';
 import { getCategoryIcon, getCategoryTranslation } from '@/utils/categoryVariants';
 import { getAllCategories } from '@/services/categoryService';
 
-interface CategoryPageProps {
-  category: string;
-}
-
-const CategoryPage = ({ category }: CategoryPageProps) => {
+const CategoryPage = () => {
+  const { categorySlug } = useParams<{ categorySlug: string }>();
   const { data: products = [], isLoading, isError } = useProducts();
   const { t, language } = useLanguage();
   const { data: categoriesData = [] } = useQuery({
@@ -35,18 +32,24 @@ const CategoryPage = ({ category }: CategoryPageProps) => {
     resetAnimation
   } = useCartAnimation();
 
-  // Filter products by the specified category
-  const categoryProducts = products.filter(product => product.category === categoryName);
-
   // Enhanced scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [category]);
+  }, [categorySlug]);
 
-  // Find category object if it exists in categoriesData
-  const categoryObj = categoriesData.find(c => c.name === category || c.slug === category);
-  const categoryName = categoryObj?.name || category;
-  const categoryIcon = categoryObj?.icon || getCategoryIcon(category);
+  // Find category object by slug or name
+  const categoryObj = categoriesData.find(c => 
+    c.slug === categorySlug || 
+    getCategoryUrlPath(c.name) === categorySlug ||
+    c.name.toLowerCase().replace(/\s+/g, '-') === categorySlug
+  );
+  
+  // If not found in database, try to match with legacy categories
+  const legacyCategories = ['Makanan Ringan', 'Bumbu Dapur', 'Makanan Siap Saji', 'Sayur & Bahan Segar', 'Bahan Masak Beku', 'Sayur & Bumbu', 'Kerupuk'];
+  const legacyCategory = legacyCategories.find(cat => getCategoryUrlPath(cat) === categorySlug);
+  
+  const categoryName = categoryObj?.name || legacyCategory || categorySlug?.replace(/-/g, ' ') || 'Unknown Category';
+  const categoryIcon = categoryObj?.icon || getCategoryIcon(categoryName);
   const categoryDescription = categoryObj?.description || '';
 
   const handleAddToCart = (product: Product, position: { x: number; y: number }) => {
@@ -93,6 +96,9 @@ const CategoryPage = ({ category }: CategoryPageProps) => {
       </div>
     );
   }
+
+  // Filter products by the specified category - moved here after loading checks
+  const categoryProducts = products.filter(product => product.category === categoryName);
 
   return (
     <div className="min-h-screen bg-gray-50">
