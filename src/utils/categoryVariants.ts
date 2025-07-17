@@ -112,7 +112,27 @@ export const getCategoriesWithVariants = () => {
 
 // Fungsi untuk mendapatkan icon kategori
 export const getCategoryIcon = (category: string) => {
-  return categoryVariants[category]?.icon || '📦';
+  // Map of category names to icons
+  const iconMap: Record<string, string> = {
+    'Makanan Ringan': '🍿',
+    'Bumbu Dapur': '🌶️',
+    'Makanan Siap Saji': '🍜',
+    'Bahan Masak Beku': '🧊',
+    'Sayur & Bumbu': '🥬',
+    'Kerupuk': '🍃',
+    'Elektronik': '📱',
+    'Obat-obatan': '💊',
+    'Rempah Instan': '🧂',
+    'Minuman': '🥤',
+    'Sayur & Bahan Segar': '🥬',
+    'Sayur Beku': '🥦',
+    'Sayur Segar/Beku': '🥗',
+    'Bon Cabe': '🌶️'
+  };
+  
+  // Return the icon for the category or a default icon if not found
+  return iconMap[category] || categoryVariants[category]?.icon || '📦';
+}
 };
 
 // Fungsi untuk memvalidasi varian yang dipilih
