@@ -17,6 +17,18 @@ import ProductVariants from '@/components/admin/ProductVariants';
 import { updateProduct, uploadProductImages, getCategories } from '@/services/productService';
 import { getAllCategories } from '@/services/categoryService';
 
+const getCategoryIcon = (category: string) => {
+  const iconMap: { [key: string]: string } = {
+    'Makanan Ringan': '🍿',
+    'Bumbu Dapur': '🧄',
+    'Makanan Siap Saji': '🍱',
+    'Bahan Masak Beku': '🧊',
+    'Sayur & Bumbu': '🥬',
+    'Kerupuk': '🍘'
+  };
+  return iconMap[category] || '📦';
+};
+
 const EditProduct = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -313,15 +325,28 @@ const EditProduct = () => {
                     <SelectTrigger>
                       <SelectValue placeholder="Pilih kategori" />
                     </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          <div className="flex items-center space-x-2">
-                            <span>{getCategoryIcon(category)}</span>
-                            <span>{category}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                    <SelectContent className="max-h-[300px]">
+                      {categoriesLoading ? (
+                        <div className="p-2 text-center">
+                          <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full inline-block mr-2"></div>
+                          <span>Loading categories...</span>
+                        </div>
+                      ) : (
+                        categories.map((category) => {
+                          // Find category object if it exists in categoriesData
+                          const categoryObj = categoriesData.find(c => c.name === category);
+                          const icon = categoryObj?.icon || getCategoryIcon(category);
+                          
+                          return (
+                            <SelectItem key={category} value={category}>
+                              <div className="flex items-center space-x-2">
+                                <span>{icon}</span>
+                                <span>{category}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -379,28 +404,15 @@ const EditProduct = () => {
                               alt={`Existing ${index + 1}`} 
                               className="w-full h-24 object-cover rounded-lg border"
                             />
-                      <SelectContent className="max-h-[300px]">
-                        {categoriesLoading ? (
-                          <div className="p-2 text-center">
-                            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full inline-block mr-2"></div>
-                            <span>Loading categories...</span>
+                            <button
+                              type="button"
+                              onClick={() => removeExistingImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
                           </div>
-                        ) : (
-                          categories.map((category) => {
-                            // Find category object if it exists in categoriesData
-                            const categoryObj = categoriesData.find(c => c.name === category);
-                            const icon = categoryObj?.icon || '📦';
-                            
-                            return (
-                              <SelectItem key={category} value={category}>
-                                <div className="flex items-center space-x-2">
-                                  <span>{icon}</span>
-                                  <span>{category}</span>
-                                </div>
-                              </SelectItem>
-                            );
-                          })
-                        )}
+                        ))}
                       </div>
                     </div>
                   )}
