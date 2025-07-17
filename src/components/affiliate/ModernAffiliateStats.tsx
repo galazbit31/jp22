@@ -33,14 +33,14 @@ const ModernAffiliateStats = () => {
   // Calculate commission growth (mock data for now)
   const commissionGrowth = 12.5; // This would come from backend in a real implementation
   
+  // Calculate available commission (approved commissions only)
+  const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
+  const availableCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+
   // Calculate true pending commission (excluding approved commissions)
   // Ensure it's never negative by using Math.max
   const truePendingCommission = affiliate ? 
     Math.max(0, affiliate.pendingCommission - availableCommission) : 0;
-
-  // Calculate available commission (approved commissions only)
-  const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
-  const availableCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
 
   const stats = [
     {
