@@ -29,8 +29,10 @@ export const getAllCategories = async () => {
   } catch (error) {
     console.error('Error fetching categories:', error);
     
-    // Fallback to default categories if Firestore rules are not properly deployed
-    if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+    // Check for permission errors more comprehensively
+    if (error?.code === 'permission-denied' || 
+        error?.message?.includes('Missing or insufficient permissions') ||
+        error?.message?.includes('permission-denied')) {
       console.warn('Using fallback categories due to permission error. Please check Firebase rules deployment.');
       return getDefaultCategories();
     }
