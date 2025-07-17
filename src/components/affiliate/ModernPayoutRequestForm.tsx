@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -6,13 +6,15 @@ import { useAffiliate } from '@/hooks/useAffiliate';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
-import { DollarSign, CreditCard, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { DollarSign, CreditCard, AlertTriangle, CheckCircle2, RefreshCw, Info } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useCurrencyConverter } from '@/hooks/useCurrencyConverter';
 
 const payoutSchema = z.object({
   amount: z.string()
@@ -25,6 +27,7 @@ const payoutSchema = z.object({
     }),
   method: z.string().min(1, 'Metode pembayaran wajib dipilih'),
   bankName: z.string().min(1, 'Nama bank wajib diisi'),
+  branchCode: z.string().optional(),
   accountNumber: z.string().min(1, 'Nomor rekening wajib diisi'),
   accountName: z.string().min(1, 'Nama pemilik rekening wajib diisi'),
 });
@@ -45,6 +48,20 @@ const ModernPayoutRequestForm = () => {
   // Ensure it's never negative by using Math.max
   const truePendingCommission = affiliate ? 
     Math.max(0, affiliate.pendingCommission - availableCommission) : 0;
+    
+  // State for currency conversion
+  const [selectedMethod, setSelectedMethod] = useState<string>('');
+  const [amountInYen, setAmountInYen] = useState<number>(0);
+  
+  // Use currency converter hook for IDR conversion
+  const { 
+    convertedRupiah, 
+    isLoading: conversionLoading, 
+    error: conversionError,
+    lastUpdated,
+    refreshRate,
+    isRefreshing
+  } = useCurrencyConverter(amountInYen, selectedMethod === 'Transfer Bank Rupiah (Indonesia)' ? 'Bank Transfer (Rupiah)' : '');
 
   const form = useForm<PayoutFormValues>({
     resolver: zodResolver(payoutSchema),
@@ -52,10 +69,22 @@ const ModernPayoutRequestForm = () => {
       amount: '',
       method: '',
       bankName: affiliate?.bankInfo?.bankName || '',
+      branchCode: affiliate?.bankInfo?.branchCode || '',
       accountNumber: affiliate?.bankInfo?.accountNumber || '',
       accountName: affiliate?.bankInfo?.accountName || '',
     },
   });
+   
+  // Watch amount and method fields for currency conversion
+  const watchAmount = form.watch('amount');
+  const watchMethod = form.watch('method');
+  
+  // Update amount in yen and selected method when form values change
+  useEffect(() => {
+    const amount = Number(watchAmount) || 0;
+    setAmountInYen(amount);
+    setSelectedMethod(watchMethod);
+  }, [watchAmount, watchMethod]);
 
   const onSubmit = async (data: PayoutFormValues) => {
     if (!affiliate) {
@@ -96,6 +125,11 @@ const ModernPayoutRequestForm = () => {
         bankName: data.bankName,
         accountNumber: data.accountNumber,
         accountName: data.accountName,
+        branchCode: data.branchCode || '',
+        currency: data.method === 'Transfer Bank Rupiah (Indonesia)' ? 'IDR' : 'JPY',
+        conversionRate: data.method === 'Transfer Bank Rupiah (Indonesia)' ? 
+          (convertedRupiah && amountInYen > 0 ? convertedRupiah / amountInYen : null) : null,
+        estimatedAmount: data.method === 'Transfer Bank Rupiah (Indonesia)' ? convertedRupiah : null
       };
       
       await requestPayout(amount, data.method, bankInfo);
@@ -288,65 +322,186 @@ const ModernPayoutRequestForm = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {settings.payoutMethods.map((method) => (
-                              <SelectItem key={method} value={method}>
-                                {method}
-                              </SelectItem>
-                            ))}
+                            <SelectItem value="Transfer Bank Jepang">Transfer Bank Jepang</SelectItem>
+                            <SelectItem value="Transfer Bank Rupiah (Indonesia)">Transfer Bank Rupiah (Indonesia)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+           
+           {/* Currency conversion info for Indonesian Rupiah transfers */}
+           {watchMethod === 'Transfer Bank Rupiah (Indonesia)' && watchAmount && (
+             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+               <h4 className="font-medium text-blue-800 mb-2 flex items-center">
+                 <Info className="w-4 h-4 mr-2" />
+                 Konversi Mata Uang
+               </h4>
+               
+               <div className="flex justify-between items-center mb-2">
+                 <div className="flex items-center">
+                   {conversionLoading || isRefreshing ? (
+                     <div className="flex items-center">
+                       <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+                       <span className="text-blue-600">Mengkonversi...</span>
+                     </div>
+                   ) : (
+                     <span className="font-bold text-blue-700 text-xl">
+                       Rp {convertedRupiah?.toLocaleString('id-ID') || '-'}
+                     </span>
+                   )}
+                 </div>
+                 <Button 
+                   onClick={() => refreshRate()}
+                   variant="outline"
+                   size="sm"
+                   className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                   disabled={isRefreshing}
+                 >
+                   <RefreshCw className={`w-4 h-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                   {isRefreshing ? 'Menyegarkan...' : 'Perbarui Kurs'}
+                 </Button>
+               </div>
+               
+               {lastUpdated && (
+                 <p className="text-xs text-blue-600 flex items-center mb-3">
+                   <Info className="w-3 h-3 mr-1" />
+                   Kurs otomatis, diperbarui pada {lastUpdated}
+                 </p>
+               )}
+               
+               {conversionError && (
+                 <Alert variant="destructive" className="mt-2">
+                   <AlertDescription>
+                     {conversionError}. Silakan coba lagi atau gunakan metode pembayaran lain.
+                   </AlertDescription>
+                 </Alert>
+               )}
+             </div>
+           )}
 
                   <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                     <div className="flex items-center">
                       <CreditCard className="w-5 h-5 text-gray-500 mr-2" /> 
                       <h4 className="font-medium text-gray-700">{t('affiliate.bankInfo')}</h4>
                     </div>
+             
+             {/* Conditional fields based on payment method */}
+             {watchMethod === 'Transfer Bank Jepang' && (
+               <div className="space-y-4">
+                 <FormField
+                   control={form.control}
+                   name="bankName"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Nama Bank Jepang</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Contoh: MUFG Bank, Japan Post Bank" />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+                 
+                 <FormField
+                   control={form.control}
+                   name="branchCode"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Kode Cabang</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Contoh: 001" />
+                       </FormControl>
+                       <p className="text-xs text-gray-500 mt-1">
+                         Kode cabang bank Jepang (biasanya 3 digit)
+                       </p>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
 
-                    <FormField
-                      control={form.control}
-                      name="bankName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('affiliate.bankName')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Contoh: BCA, Mandiri, BNI" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                 <FormField
+                   control={form.control}
+                   name="accountNumber"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Nomor Rekening</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Masukkan nomor rekening Jepang" />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
 
-                    <FormField
-                      control={form.control}
-                      name="accountNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('affiliate.accountNumber')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Masukkan nomor rekening" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                 <FormField
+                   control={form.control}
+                   name="accountName"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Nama Pemilik Rekening</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Masukkan nama pemilik rekening" />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+               </div>
+             )}
+             
+             {watchMethod === 'Transfer Bank Rupiah (Indonesia)' && (
+               <div className="space-y-4">
+                 <FormField
+                   control={form.control}
+                   name="bankName"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Nama Bank Indonesia</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Contoh: BCA, Mandiri, BNI" />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
 
-                    <FormField
-                      control={form.control}
-                      name="accountName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('affiliate.accountHolderName')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="Masukkan nama pemilik rekening" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                 <FormField
+                   control={form.control}
+                   name="accountNumber"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Nomor Rekening</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Masukkan nomor rekening Indonesia" />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+
+                 <FormField
+                   control={form.control}
+                   name="accountName"
+                   render={({ field }) => (
+                     <FormItem>
+                       <FormLabel>Nama Pemilik Rekening</FormLabel>
+                       <FormControl>
+                         <Input {...field} placeholder="Masukkan nama pemilik rekening" />
+                       </FormControl>
+                       <FormMessage />
+                     </FormItem>
+                   )}
+                 />
+               </div>
+             )}
+             
+             {!watchMethod && (
+               <div className="text-center py-4 text-gray-500">
+                 Pilih metode pembayaran terlebih dahulu
+               </div>
+             )}
                   </div>
 
                   <div className="flex gap-2 pt-2">
@@ -361,7 +516,7 @@ const ModernPayoutRequestForm = () => {
                     <Button 
                       type="submit" 
                       className="flex-1"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !watchMethod}
                     >
                       {isSubmitting ? 'Processing...' : 'Submit Request'}
                     </Button>

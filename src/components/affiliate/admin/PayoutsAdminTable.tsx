@@ -262,6 +262,12 @@ const PayoutsAdminTable = () => {
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <div className="py-4">
+                                  {selectedPayout.bankInfo.branchCode && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Kode Cabang:</span>
+                                      <span>{selectedPayout.bankInfo.branchCode}</span>
+                                    </div>
+                                  )}
                                 <label className="text-sm font-medium text-gray-700">
                                   Catatan (Opsional)
                                 </label>
@@ -270,6 +276,12 @@ const PayoutsAdminTable = () => {
                                   onChange={(e) => setNotes(e.target.value)}
                                   placeholder="Masukkan catatan jika diperlukan"
                                   className="mt-2"
+                                  {selectedPayout.bankInfo.currency === 'IDR' && selectedPayout.bankInfo.estimatedAmount && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Estimasi Rupiah:</span>
+                                      <span>Rp {selectedPayout.bankInfo.estimatedAmount.toLocaleString('id-ID')}</span>
+                                    </div>
+                                  )}
                                 />
                               </div>
                               <AlertDialogFooter>

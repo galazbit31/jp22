@@ -883,6 +883,10 @@ export const requestPayout = async (
     bankName: string;
     accountNumber: string;
     accountName: string;
+    branchCode?: string;
+    currency?: string;
+    conversionRate?: number | null;
+    estimatedAmount?: number | null;
   }
 ): Promise<string> => {
   try {
@@ -916,7 +920,10 @@ export const requestPayout = async (
       method,
       status: 'pending',
       bankInfo,
-      requestedAt: new Date().toISOString()
+      requestedAt: new Date().toISOString(),
+      notes: bankInfo?.currency === 'IDR' ? 
+        `Konversi ke Rupiah: ¥${amount} ≈ Rp${bankInfo.estimatedAmount?.toLocaleString('id-ID')} (kurs: ${bankInfo.conversionRate})` : 
+        undefined
     };
     
     const payoutRef = await addDoc(collection(db, PAYOUTS_COLLECTION), payoutData);
@@ -1288,6 +1295,8 @@ export const updateAffiliateBankInfo = async (
     bankName: string;
     accountNumber: string;
     accountName: string;
+    branchCode?: string;
+    currency?: string;
   }
 ): Promise<void> => {
   try {

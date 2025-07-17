@@ -325,8 +325,14 @@ const ModernPayoutsTable = () => {
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
                                     <span className="text-gray-600">Amount:</span>
-                                    <span className="font-semibold text-primary">¥{selectedPayout.amount.toLocaleString()}</span>
+                                    <span>{selectedPayout.bankInfo.bankName}</span>
                                   </div>
+                                  {selectedPayout.bankInfo.branchCode && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Kode Cabang:</span>
+                                      <span>{selectedPayout.bankInfo.branchCode}</span>
+                                    </div>
+                                  )}
                                   <div className="flex justify-between">
                                     <span className="text-gray-600">Method:</span>
                                     <span>{selectedPayout.method}</span>
@@ -335,6 +341,12 @@ const ModernPayoutsTable = () => {
                                     <span className="text-gray-600">Requested:</span>
                                     <span>{formatDate(selectedPayout.requestedAt)}</span>
                                   </div>
+                                  {selectedPayout.bankInfo.currency === 'IDR' && selectedPayout.bankInfo.estimatedAmount && (
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-600">Estimasi Rupiah:</span>
+                                      <span>Rp {selectedPayout.bankInfo.estimatedAmount.toLocaleString('id-ID')}</span>
+                                    </div>
+                                  )}
                                   {selectedPayout.processedAt && (
                                     <div className="flex justify-between">
                                       <span className="text-gray-600">Processed:</span>

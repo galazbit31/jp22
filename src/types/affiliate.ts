@@ -13,6 +13,10 @@ export interface AffiliateUser {
     bankName: string;
     accountNumber: string;
     accountName: string;
+    branchCode?: string;
+    currency?: string;
+    conversionRate?: number | null;
+    estimatedAmount?: number | null;
   };
   createdAt: string;
   updatedAt: string;
@@ -105,6 +109,10 @@ export interface AffiliatePayout {
     bankName: string;
     accountNumber: string;
     accountName: string;
+    branchCode?: string;
+    currency?: string;
+    conversionRate?: number | null;
+    estimatedAmount?: number | null;
   };
   requestedAt: string;
   processedAt?: string;

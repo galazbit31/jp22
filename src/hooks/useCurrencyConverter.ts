@@ -70,7 +70,7 @@ export const useCurrencyConverter = (yenAmount: number, paymentMethod: string) =
     
     try {
       // Try primary API first
-      const response = await fetch('https://api.exchangerate.host/latest?base=JPY&symbols=IDR', {
+      const response = await fetch('https://api.exchangerate-api.com/v4/latest/JPY', {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -142,7 +142,7 @@ export const useCurrencyConverter = (yenAmount: number, paymentMethod: string) =
   // Initial load effect - only runs when payment method changes to Rupiah
   useEffect(() => {
     // Only fetch exchange rate if payment method is bank transfer in Rupiah
-    if (paymentMethod === 'Bank Transfer (Rupiah)' || paymentMethod === 'QRIS / QR Code') {
+    if (paymentMethod === 'Bank Transfer (Rupiah)' || paymentMethod === 'QRIS / QR Code' || paymentMethod === 'Transfer Bank Rupiah (Indonesia)') {
       // Try to get cached rate first
       const cachedRate = getCachedRate();
       
@@ -165,7 +165,7 @@ export const useCurrencyConverter = (yenAmount: number, paymentMethod: string) =
 
   // Recalculation effect - only runs when yenAmount changes and we already have a rate
   useEffect(() => {
-    if (exchangeRate && (paymentMethod === 'Bank Transfer (Rupiah)' || paymentMethod === 'QRIS / QR Code')) {
+    if (exchangeRate && (paymentMethod === 'Bank Transfer (Rupiah)' || paymentMethod === 'QRIS / QR Code' || paymentMethod === 'Transfer Bank Rupiah (Indonesia)')) {
       setConvertedRupiah(Math.round(yenAmount * exchangeRate));
     }
   }, [yenAmount, exchangeRate, paymentMethod]);
