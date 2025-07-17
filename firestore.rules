@@ -69,6 +69,12 @@ service cloud.firestore {
       allow update, delete: if request.auth != null;
     }
     
+    // Allow anyone to read categories
+    match /categories/{categoryId} {
+      allow read, list: if true;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
+    }
+    
     // Allow POS transactions to be read/written by authenticated users (admins only for financial reports)
     match /pos_transactions/{transactionId} {
       allow read, list: if request.auth != null && isAdmin();

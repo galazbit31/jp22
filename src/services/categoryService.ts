@@ -8,7 +8,8 @@ import {
   deleteDoc, 
   query, 
   where, 
-  orderBy 
+  orderBy,
+  setDoc
 } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 
@@ -18,43 +19,89 @@ const PRODUCTS_COLLECTION = 'products';
 // Get all categories
 export const getAllCategories = async () => {
   try {
-    const categoriesRef = collection(db, CATEGORIES_COLLECTION);
-    const q = query(categoriesRef, orderBy('name', 'asc'));
-    const snapshot = await getDocs(q);
-    
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    // First check if the categories collection exists and has documents
+    try {
+      const categoriesRef = collection(db, CATEGORIES_COLLECTION);
+      const q = query(categoriesRef, orderBy('name', 'asc'));
+      const snapshot = await getDocs(q);
+      
+      // If we have categories, return them
+      if (snapshot.size > 0) {
+        console.log(`Found ${snapshot.size} categories in Firestore`);
+        return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+      }
+      
+      // If no categories exist, initialize with default categories
+      console.log('No categories found, initializing default categories');
+      return initializeDefaultCategories();
+    } catch (innerError) {
+      console.error('Error accessing categories collection:', innerError);
+      
+      // Check for permission errors
+      if (innerError?.code === 'permission-denied' || 
+          innerError?.message?.includes('Missing or insufficient permissions') ||
+          innerError?.message?.includes('permission-denied')) {
+        console.warn('Permission denied accessing categories. Using default categories.');
+        return getDefaultCategories();
+      }
+      
+      throw innerError;
+    }
   } catch (error) {
     console.error('Error fetching categories:', error);
     
-    // Check for permission errors more comprehensively
-    if (error?.code === 'permission-denied' || 
-        error?.message?.includes('Missing or insufficient permissions') ||
-        error?.message?.includes('permission-denied')) {
-      console.warn('Using fallback categories due to permission error. Please check Firebase rules deployment.');
-      return getDefaultCategories();
-    }
-    
-    throw error;
+    // Return default categories as fallback
+    console.warn('Using fallback categories due to error');
+    return getDefaultCategories();
   }
 };
 
 // Default categories fallback
 const getDefaultCategories = () => {
   return [
-    { id: 'makanan-ringan', name: 'Makanan Ringan', slug: 'makanan-ringan', icon: '🍿', description: 'Snack dan makanan ringan' },
-    { id: 'bumbu-dapur', name: 'Bumbu Dapur', slug: 'bumbu-dapur', icon: '🌶️', description: 'Bumbu dan rempah masakan' },
-    { id: 'makanan-siap-saji', name: 'Makanan Siap Saji', slug: 'makanan-siap-saji', icon: '🍱', description: 'Makanan siap konsumsi' },
-    { id: 'bahan-masak-beku', name: 'Bahan Masak Beku', slug: 'bahan-masak-beku', icon: '🧊', description: 'Bahan masakan beku' },
-    { id: 'sayur-bumbu', name: 'Sayur & Bumbu', slug: 'sayur-bumbu', icon: '🥬', description: 'Sayuran dan bumbu segar' },
-    { id: 'kerupuk', name: 'Kerupuk', slug: 'kerupuk', icon: '🍘', description: 'Kerupuk dan keripik' },
-    { id: 'minuman', name: 'Minuman', slug: 'minuman', icon: '🥤', description: 'Minuman dan beverage' },
-    { id: 'rempah-instan', name: 'Rempah Instan', slug: 'rempah-instan', icon: '🧂', description: 'Rempah dan bumbu instan' },
-    { id: 'obat-obatan', name: 'Obat-obatan', slug: 'obat-obatan', icon: '💊', description: 'Obat dan suplemen' },
-    { id: 'elektronik', name: 'Elektronik', slug: 'elektronik', icon: '📱', description: 'Perangkat elektronik' }
+    { id: 'makanan-ringan', name: 'Makanan Ringan', slug: 'makanan-ringan', icon: '🍿', description: 'Snack dan makanan ringan', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'bumbu-dapur', name: 'Bumbu Dapur', slug: 'bumbu-dapur', icon: '🌶️', description: 'Bumbu dan rempah masakan', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'makanan-siap-saji', name: 'Makanan Siap Saji', slug: 'makanan-siap-saji', icon: '🍱', description: 'Makanan siap konsumsi', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'bahan-masak-beku', name: 'Bahan Masak Beku', slug: 'bahan-masak-beku', icon: '🧊', description: 'Bahan masakan beku', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'sayur-bumbu', name: 'Sayur & Bumbu', slug: 'sayur-bumbu', icon: '🥬', description: 'Sayuran dan bumbu segar', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'kerupuk', name: 'Kerupuk', slug: 'kerupuk', icon: '🍘', description: 'Kerupuk dan keripik', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'minuman', name: 'Minuman', slug: 'minuman', icon: '🥤', description: 'Minuman dan beverage', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'rempah-instan', name: 'Rempah Instan', slug: 'rempah-instan', icon: '🧂', description: 'Rempah dan bumbu instan', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'obat-obatan', name: 'Obat-obatan', slug: 'obat-obatan', icon: '💊', description: 'Obat dan suplemen', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: 'elektronik', name: 'Elektronik', slug: 'elektronik', icon: '📱', description: 'Perangkat elektronik', created_at: new Date().toISOString(), updated_at: new Date().toISOString() }
   ];
+};
+
+// Initialize default categories in Firestore
+const initializeDefaultCategories = async () => {
+  try {
+    console.log('Initializing default categories in Firestore');
+    const defaultCategories = getDefaultCategories();
+    const categoriesRef = collection(db, CATEGORIES_COLLECTION);
+    
+    // Add each default category to Firestore
+    const promises = defaultCategories.map(async (category) => {
+      try {
+        // Use setDoc with merge to avoid duplicates
+        await setDoc(doc(db, CATEGORIES_COLLECTION, category.id), category, { merge: true });
+        return { ...category, id: category.id };
+      } catch (error) {
+        console.error(`Error adding category ${category.name}:`, error);
+        return category; // Return the category anyway for the UI
+      }
+    });
+    
+    const results = await Promise.all(promises);
+    console.log(`Initialized ${results.length} default categories`);
+    return results;
+  } catch (error) {
+    console.error('Error initializing default categories:', error);
+    // Return default categories even if initialization fails
+    return getDefaultCategories();
+  }
 };
 
 // Get a single category by ID
