@@ -75,15 +75,11 @@ const AddToCartButton = ({
       duration: 3000,
       action: (
         <button 
-          className="text-primary hover:text-primary/80 font-medium"
     setLoading(true);
           onClick={() => window.location.href = '/cart'}
         >
           {t('cart.viewCart')}
         </button>
-      )
-    } finally {
-      setLoading(false);
     });
   };
 
