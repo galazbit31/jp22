@@ -132,7 +132,6 @@ export const getCategoryIcon = (category: string) => {
   
   // Return the icon for the category or a default icon if not found
   return iconMap[category] || categoryVariants[category]?.icon || '📦';
-}
 };
 
 // Fungsi untuk memvalidasi varian yang dipilih
