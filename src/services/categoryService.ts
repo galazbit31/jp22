@@ -28,8 +28,31 @@ export const getAllCategories = async () => {
     }));
   } catch (error) {
     console.error('Error fetching categories:', error);
+    
+    // Fallback to default categories if Firestore rules are not properly deployed
+    if (error.code === 'permission-denied' || error.message?.includes('Missing or insufficient permissions')) {
+      console.warn('Using fallback categories due to permission error. Please check Firebase rules deployment.');
+      return getDefaultCategories();
+    }
+    
     throw error;
   }
+};
+
+// Default categories fallback
+const getDefaultCategories = () => {
+  return [
+    { id: 'makanan-ringan', name: 'Makanan Ringan', slug: 'makanan-ringan', icon: '🍿', description: 'Snack dan makanan ringan' },
+    { id: 'bumbu-dapur', name: 'Bumbu Dapur', slug: 'bumbu-dapur', icon: '🌶️', description: 'Bumbu dan rempah masakan' },
+    { id: 'makanan-siap-saji', name: 'Makanan Siap Saji', slug: 'makanan-siap-saji', icon: '🍱', description: 'Makanan siap konsumsi' },
+    { id: 'bahan-masak-beku', name: 'Bahan Masak Beku', slug: 'bahan-masak-beku', icon: '🧊', description: 'Bahan masakan beku' },
+    { id: 'sayur-bumbu', name: 'Sayur & Bumbu', slug: 'sayur-bumbu', icon: '🥬', description: 'Sayuran dan bumbu segar' },
+    { id: 'kerupuk', name: 'Kerupuk', slug: 'kerupuk', icon: '🍘', description: 'Kerupuk dan keripik' },
+    { id: 'minuman', name: 'Minuman', slug: 'minuman', icon: '🥤', description: 'Minuman dan beverage' },
+    { id: 'rempah-instan', name: 'Rempah Instan', slug: 'rempah-instan', icon: '🧂', description: 'Rempah dan bumbu instan' },
+    { id: 'obat-obatan', name: 'Obat-obatan', slug: 'obat-obatan', icon: '💊', description: 'Obat dan suplemen' },
+    { id: 'elektronik', name: 'Elektronik', slug: 'elektronik', icon: '📱', description: 'Perangkat elektronik' }
+  ];
 };
 
 // Get a single category by ID
