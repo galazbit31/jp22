@@ -6,7 +6,6 @@ import { Product } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
-import { ButtonSpinner } from './ui/loading';
 
 interface AddToCartButtonProps {
   product: Product;
