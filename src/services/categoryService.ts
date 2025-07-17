@@ -36,7 +36,7 @@ export const getAllCategories = async () => {
       
       // If no categories exist, initialize with default categories
       console.log('No categories found, initializing default categories');
-      return initializeDefaultCategories();
+      return getDefaultCategories();
     } catch (innerError) {
       console.error('Error accessing categories collection:', innerError);
       

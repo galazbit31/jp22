@@ -42,7 +42,8 @@ import {
   addCategory, 
   updateCategory, 
   deleteCategory,
-  getCategoryProductCount
+  getCategoryProductCount,
+  initializeDefaultCategories
 } from '@/services/categoryService';
 
 interface Category {
@@ -69,6 +70,7 @@ const CategoryManagement = () => {
     icon: ''
   });
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch categories on component mount
@@ -226,6 +228,27 @@ const CategoryManagement = () => {
     }
   };
 
+  const handleInitializeCategories = async () => {
+    setIsInitializing(true);
+    try {
+      await initializeDefaultCategories();
+      toast({
+        title: "Success",
+        description: "Default categories initialized successfully",
+      });
+      fetchCategories();
+    } catch (error) {
+      console.error('Error initializing categories:', error);
+      toast({
+        title: "Error",
+        description: "Failed to initialize default categories. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
   const openEditDialog = (category: Category) => {
     setSelectedCategory(category);
     setFormData({
@@ -257,6 +280,16 @@ const CategoryManagement = () => {
           <Button onClick={() => setIsAddDialogOpen(true)} className="bg-green-600 hover:bg-green-700">
             <Plus className="w-4 h-4 mr-2" />
             Tambah Kategori Baru
+          </Button>
+          
+          <Button 
+            onClick={handleInitializeCategories} 
+            variant="outline"
+            disabled={isInitializing}
+            className="ml-2"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isInitializing ? 'animate-spin' : ''}`} />
+            {isInitializing ? 'Initializing...' : 'Initialize Default Categories'}
           </Button>
         </div>
 
