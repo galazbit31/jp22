@@ -61,7 +61,7 @@ const ModernPayoutRequestForm = () => {
     lastUpdated,
     refreshRate,
     isRefreshing
-  } = useCurrencyConverter(amountInYen, selectedMethod === 'Transfer Bank Rupiah (Indonesia)' ? 'Bank Transfer (Rupiah)' : '');
+  } = useCurrencyConverter(amountInYen * 0.9, selectedMethod === 'Transfer Bank Rupiah (Indonesia)' ? 'Bank Transfer (Rupiah)' : '');
 
   const form = useForm<PayoutFormValues>({
     resolver: zodResolver(payoutSchema),
@@ -86,6 +86,10 @@ const ModernPayoutRequestForm = () => {
     setSelectedMethod(watchMethod);
   }, [watchAmount, watchMethod]);
 
+  // Calculate tax amounts
+  const grossAmount = Number(watchAmount) || 0;
+  const taxAmount = Math.round(grossAmount * 0.1);
+  const netAmount = grossAmount - taxAmount;
   const onSubmit = async (data: PayoutFormValues) => {
     if (!affiliate) {
       toast({
@@ -128,8 +132,10 @@ const ModernPayoutRequestForm = () => {
         branchCode: data.branchCode || '',
         currency: data.method === 'Transfer Bank Rupiah (Indonesia)' ? 'IDR' : 'JPY',
         conversionRate: data.method === 'Transfer Bank Rupiah (Indonesia)' ? 
-          (convertedRupiah && amountInYen > 0 ? convertedRupiah / amountInYen : null) : null,
-        estimatedAmount: data.method === 'Transfer Bank Rupiah (Indonesia)' ? convertedRupiah : null
+          (convertedRupiah && netAmount > 0 ? convertedRupiah / netAmount : null) : null,
+        estimatedAmount: data.method === 'Transfer Bank Rupiah (Indonesia)' ? convertedRupiah : null,
+        taxAmount: taxAmount,
+        netAmount: netAmount
       };
       
       await requestPayout(amount, data.method, bankInfo);
@@ -339,6 +345,10 @@ const ModernPayoutRequestForm = () => {
                  Konversi Mata Uang
                </h4>
                
+               <div className="mb-3 p-2 bg-blue-100 rounded text-xs text-blue-700">
+                 <strong>Penting:</strong> Konversi dilakukan pada jumlah bersih setelah pajak (¥{netAmount.toLocaleString()})
+               </div>
+               
                <div className="flex justify-between items-center mb-2">
                  <div className="flex items-center">
                    {conversionLoading || isRefreshing ? (
@@ -367,7 +377,7 @@ const ModernPayoutRequestForm = () => {
                {lastUpdated && (
                  <p className="text-xs text-blue-600 flex items-center mb-3">
                    <Info className="w-3 h-3 mr-1" />
-                   Kurs otomatis, diperbarui pada {lastUpdated}
+                   Kurs otomatis untuk jumlah bersih, diperbarui pada {lastUpdated}
                  </p>
                )}
                

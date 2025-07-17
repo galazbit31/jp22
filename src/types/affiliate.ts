@@ -113,6 +113,8 @@ export interface AffiliatePayout {
     currency?: string;
     conversionRate?: number | null;
     estimatedAmount?: number | null;
+    taxAmount?: number;
+    netAmount?: number;
   };
   requestedAt: string;
   processedAt?: string;

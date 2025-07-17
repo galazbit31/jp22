@@ -325,8 +325,20 @@ const ModernPayoutsTable = () => {
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
                                     <span className="text-gray-600">Amount:</span>
-                                    <span>{selectedPayout.bankInfo.bankName}</span>
+                                    <span>¥{selectedPayout.amount.toLocaleString()}</span>
                                   </div>
+                                  {selectedPayout.bankInfo?.taxAmount && (
+                                    <>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Pajak (10%):</span>
+                                        <span className="text-red-600">-¥{selectedPayout.bankInfo.taxAmount.toLocaleString()}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-600">Jumlah Bersih:</span>
+                                        <span className="font-medium text-green-600">¥{selectedPayout.bankInfo.netAmount?.toLocaleString()}</span>
+                                      </div>
+                                    </>
+                                  )}
                                   {selectedPayout.bankInfo.branchCode && (
                                     <div className="flex justify-between">
                                       <span className="text-gray-600">Kode Cabang:</span>

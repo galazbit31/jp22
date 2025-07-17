@@ -887,6 +887,8 @@ export const requestPayout = async (
     currency?: string;
     conversionRate?: number | null;
     estimatedAmount?: number | null;
+    taxAmount?: number;
+    netAmount?: number;
   }
 ): Promise<string> => {
   try {
@@ -913,6 +915,10 @@ export const requestPayout = async (
       throw new Error('Insufficient available commission');
     }
     
+    // Calculate tax (10% for all payouts)
+    const taxAmount = bankInfo?.taxAmount || Math.round(amount * 0.1);
+    const netAmount = bankInfo?.netAmount || (amount - taxAmount);
+    
     // Create payout request
     const payoutData: Omit<AffiliatePayout, 'id'> = {
       affiliateId,
@@ -921,9 +927,10 @@ export const requestPayout = async (
       status: 'pending',
       bankInfo,
       requestedAt: new Date().toISOString(),
-      notes: bankInfo?.currency === 'IDR' ? 
-        `Konversi ke Rupiah: ¥${amount} ≈ Rp${bankInfo.estimatedAmount?.toLocaleString('id-ID')} (kurs: ${bankInfo.conversionRate})` : 
-        undefined
+      notes: `Pajak 10%: ¥${taxAmount.toLocaleString()} | Jumlah bersih: ¥${netAmount.toLocaleString()}` + 
+        (bankInfo?.currency === 'IDR' ? 
+          ` | Konversi ke Rupiah: ¥${netAmount} ≈ Rp${bankInfo.estimatedAmount?.toLocaleString('id-ID')} (kurs: ${bankInfo.conversionRate})` : 
+          '')
     };
     
     const payoutRef = await addDoc(collection(db, PAYOUTS_COLLECTION), payoutData);
