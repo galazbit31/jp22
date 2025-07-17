@@ -14,6 +14,9 @@ import Referral from '@/pages/Referral';
 import HowToBuy from '@/pages/HowToBuy';
 import NotFound from '@/pages/NotFound';
 import CategoryPage from '@/pages/CategoryPage';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
+import TermsConditions from '@/pages/TermsConditions';
+import Help from '@/pages/Help';
 
 // Admin pages
 import Admin from '@/pages/Admin';
@@ -95,6 +98,12 @@ function App() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/referral" element={<Referral />} />
             <Route path="/how-to-buy" element={<HowToBuy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/kebijakan-privasi" element={<PrivacyPolicy />} />
+            <Route path="/terms-conditions" element={<TermsConditions />} />
+            <Route path="/syarat-ketentuan" element={<TermsConditions />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/bantuan" element={<Help />} />
             
             {/* Category routes */}
             <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
