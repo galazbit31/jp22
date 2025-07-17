@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { useCart } from '@/hooks/useCart';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/hooks/useLanguage';
+import { ButtonSpinner } from './ui/loading';
 
 interface AddToCartButtonProps {
   product: Product;
@@ -27,6 +28,7 @@ const AddToCartButton = ({
 }: AddToCartButtonProps) => {
   const { addToCart } = useCart();
   const { t } = useLanguage();
+  const [loading, setLoading] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -75,11 +77,14 @@ const AddToCartButton = ({
       action: (
         <button 
           className="text-primary hover:text-primary/80 font-medium"
+    setLoading(true);
           onClick={() => window.location.href = '/cart'}
         >
           {t('cart.viewCart')}
         </button>
       )
+    } finally {
+      setLoading(false);
     });
   };
 
@@ -90,6 +95,7 @@ const AddToCartButton = ({
       ref={buttonRef}
       onClick={handleAddToCart}
       disabled={isOutOfStock || disabled}
+      disabled={loading}
       className={`
         ${className}
         ${isOutOfStock 
@@ -106,7 +112,7 @@ const AddToCartButton = ({
         transition: { duration: 0.3 }
       } : {}}
     >
-      {/* Background ripple effect */}
+      {loading ? <ButtonSpinner size="sm" /> : <ShoppingCart className="w-5 h-5" />}
       <motion.div
         className="absolute inset-0 bg-white/20 rounded-lg"
         initial={{ scale: 0, opacity: 0 }}
