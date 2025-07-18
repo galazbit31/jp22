@@ -36,15 +36,18 @@ const Index = () => {
       console.log('Referral code detected in URL:', refCode);
       
       // Check if user already has a valid referral code
-      const { getStoredReferralCode, isReferralCodeValid, clearReferralCode } = require('@/utils/referralUtils');
-      const existingCode = getStoredReferralCode();
-      
-      if (existingCode && isReferralCodeValid() && existingCode !== refCode) {
-        console.log('User already has a valid referral code, clearing old one');
-        clearReferralCode();
-      }
-      
-      navigate(`/auth?tab=signup&ref=${refCode}`);
+      import('@/utils/referralUtils').then(({ getStoredReferralCode, isReferralCodeValid, clearReferralCode }) => {
+        const existingCode = getStoredReferralCode();
+        
+        if (existingCode && isReferralCodeValid() && existingCode !== refCode) {
+          console.log('User already has a valid referral code, clearing old one');
+          clearReferralCode();
+        }
+        
+        navigate(`/auth?tab=signup&ref=${refCode}`);
+      });
+    } else {
+      // No referral code in URL, proceed normally
     }
   }, [location.search, navigate]);
 
