@@ -29,7 +29,7 @@ const Footer = () => {
     },
     {
       name: 'Instagram',
-      url: 'https://www.instagram.com/injapan.food/',
+      url: 'https://www.instagram.com/injapanfood/',
       icon: Instagram,
       color: 'hover:text-pink-400'
     },
