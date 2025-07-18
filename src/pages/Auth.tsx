@@ -19,7 +19,7 @@ const Auth = () => {
     if (user) {
       const ensureUserProfile = async () => {
         try {
-          const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com'];
+          const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
           const role = adminEmails.includes(user.email || '') ? 'admin' : 'user';
           
           const userRef = doc(db, 'users', user.uid);

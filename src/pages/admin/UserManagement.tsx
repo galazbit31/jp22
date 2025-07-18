@@ -34,7 +34,7 @@ const UserManagement = () => {
   useEffect(() => {
     const checkCurrentUserRole = async () => {
       if (user) {
-        const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com'];
+        const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
         if (adminEmails.includes(user.email || '')) {
           setCurrentUserRole('admin');
           // Create/update current user profile in Firestore

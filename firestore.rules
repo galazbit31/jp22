@@ -108,7 +108,8 @@ service cloud.firestore {
         (request.auth.token.email == 'admin@gmail.com' || 
          request.auth.token.email == 'ari4rich@gmail.com' ||
          request.auth.token.email == 'newadmin@gmail.com' ||
-         request.auth.token.email == 'injpn@food.com');
+         request.auth.token.email == 'injpn@food.com' ||
+         request.auth.token.email == 'admin2@gmail.com');
     }
   }
 }
