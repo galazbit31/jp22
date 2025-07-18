@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/hooks/useLanguage';
 
 const ModernAffiliateStats = () => {
-  const { affiliate, loading, commissions } = useAffiliate();
+  const { affiliate, loading, commissions, referrals } = useAffiliate();
   const { t } = useLanguage();
 
   if (loading) {
