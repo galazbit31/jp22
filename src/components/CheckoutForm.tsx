@@ -93,16 +93,16 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
   // Get affiliate ID from localStorage if not provided
   useEffect(() => {
     // Import referral utilities
-    const { getStoredReferralCode, isReferralCodeValid } = require('@/utils/referralUtils');
-    
-    const storedAffiliateId = getStoredReferralCode();
-    if (storedAffiliateId && isReferralCodeValid()) {
-      console.log('Found affiliate ID in localStorage:', storedAffiliateId);
-      setAffiliateId(storedAffiliateId);
-    } else if (storedAffiliateId && !isReferralCodeValid()) {
-      console.log('Referral code found but no longer valid (expired or used)');
-      setAffiliateId(null);
-    }
+    import('@/utils/referralUtils').then(({ getStoredReferralCode, isReferralCodeValid }) => {
+      const storedAffiliateId = getStoredReferralCode();
+      if (storedAffiliateId && isReferralCodeValid()) {
+        console.log('Found affiliate ID in localStorage:', storedAffiliateId);
+        setAffiliateId(storedAffiliateId);
+      } else if (storedAffiliateId && !isReferralCodeValid()) {
+        console.log('Referral code found but no longer valid (expired or used)');
+        setAffiliateId(null);
+      }
+    });
     
     // Get or create visitor ID
     let storedVisitorId = localStorage.getItem('visitorId');

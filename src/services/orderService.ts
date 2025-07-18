@@ -173,11 +173,15 @@ export const createOrder = async (orderData: {
     // Validate referral code before using it
     let affiliate_id = sanitizedOrderData.affiliate_id || null;
     if (!affiliate_id && storedAffiliateId) {
-      const { isReferralCodeValid } = await import('@/utils/referralUtils');
-      if (isReferralCodeValid()) {
-        affiliate_id = storedAffiliateId;
-      } else {
-        console.log('Stored referral code is no longer valid, not using for order');
+      try {
+        const { isReferralCodeValid } = await import('@/utils/referralUtils');
+        if (isReferralCodeValid()) {
+          affiliate_id = storedAffiliateId;
+        } else {
+          console.log('Stored referral code is no longer valid, not using for order');
+        }
+      } catch (error) {
+        console.error('Error validating referral code:', error);
       }
     }
     
