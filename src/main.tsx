@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { registerSW } from 'virtual:pwa-register'
 import { LanguageProvider } from '@/hooks/useLanguage'
 
 // Add error boundary to catch and display render errors
@@ -24,26 +23,29 @@ window.addEventListener('error', (event) => {
   }
 });
 
-// Register service worker with custom update handling
-const updateSW = registerSW({ 
-  // Increase the interval to check for updates to reduce reload frequency
-  immediate: false,
-  intervalMS: 60 * 60 * 1000, // Check for updates every hour instead of every minute
-  onNeedRefresh() {
-    // Use a less intrusive notification instead of a confirm dialog
-    const shouldUpdate = window.localStorage.getItem('autoUpdateEnabled') !== 'false';
-    if (shouldUpdate) {
-      console.log('New content available, updating automatically');
-      updateSW(true);
-    } else {
-      console.log('New content available, but auto-update is disabled');
-      // Could show a toast notification here instead
-    }
-  },
-  onOfflineReady() {
-    console.log('App ready to work offline')
-  },
-})
+// Register service worker conditionally
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  import('virtual:pwa-register').then(({ registerSW }) => {
+    const updateSW = registerSW({
+      immediate: false,
+      intervalMS: 60 * 60 * 1000,
+      onNeedRefresh() {
+        const shouldUpdate = window.localStorage.getItem('autoUpdateEnabled') !== 'false';
+        if (shouldUpdate) {
+          console.log('New content available, updating automatically');
+          updateSW(true);
+        } else {
+          console.log('New content available, but auto-update is disabled');
+        }
+      },
+      onOfflineReady() {
+        console.log('App ready to work offline')
+      },
+    });
+  }).catch(error => {
+    console.warn('Failed to register service worker:', error);
+  });
+}
 
 // Wrap the render in a try-catch to prevent blank screen on errors
 try {
