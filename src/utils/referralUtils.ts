@@ -11,6 +11,7 @@ export const getReferralCodeFromUrl = (): string | null => {
 export const storeReferralCode = (referralCode: string): void => {
   localStorage.setItem('referralCode', referralCode);
   localStorage.setItem('referralTimestamp', Date.now().toString());
+  localStorage.setItem('referralUsed', 'false'); // Track if referral has been used
   console.log(`Stored referral code in localStorage: ${referralCode}`);
 };
 
@@ -22,6 +23,14 @@ export const getStoredReferralCode = (): string | null => {
 // Check if referral code is still valid (within 30 days)
 export const isReferralCodeValid = (): boolean => {
   const timestamp = localStorage.getItem('referralTimestamp');
+  const isUsed = localStorage.getItem('referralUsed') === 'true';
+  
+  // If referral has been used, it's no longer valid
+  if (isUsed) {
+    console.log('Referral code has already been used');
+    return false;
+  }
+  
   if (!timestamp) return false;
   
   const referralDate = new Date(parseInt(timestamp));
@@ -31,8 +40,29 @@ export const isReferralCodeValid = (): boolean => {
   const diffTime = now.getTime() - referralDate.getTime();
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
   
-  // Valid for 30 days
-  return diffDays <= 30;
+  // Valid for 7 days only (reduced from 30 days)
+  const isWithinTimeLimit = diffDays <= 7;
+  
+  if (!isWithinTimeLimit) {
+    console.log('Referral code has expired (7 days limit)');
+    clearReferralCode();
+  }
+  
+  return isWithinTimeLimit;
+};
+
+// Mark referral code as used (for first purchase only)
+export const markReferralAsUsed = (): void => {
+  localStorage.setItem('referralUsed', 'true');
+  console.log('Referral code marked as used');
+};
+
+// Clear referral code from localStorage
+export const clearReferralCode = (): void => {
+  localStorage.removeItem('referralCode');
+  localStorage.removeItem('referralTimestamp');
+  localStorage.removeItem('referralUsed');
+  console.log('Referral code cleared from localStorage');
 };
 
 // Track referral click

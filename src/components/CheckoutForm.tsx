@@ -92,10 +92,16 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
 
   // Get affiliate ID from localStorage if not provided
   useEffect(() => {
-    const storedAffiliateId = localStorage.getItem('referralCode');
-    if (storedAffiliateId) {
+    // Import referral utilities
+    const { getStoredReferralCode, isReferralCodeValid } = require('@/utils/referralUtils');
+    
+    const storedAffiliateId = getStoredReferralCode();
+    if (storedAffiliateId && isReferralCodeValid()) {
       console.log('Found affiliate ID in localStorage:', storedAffiliateId);
       setAffiliateId(storedAffiliateId);
+    } else if (storedAffiliateId && !isReferralCodeValid()) {
+      console.log('Referral code found but no longer valid (expired or used)');
+      setAffiliateId(null);
     }
     
     // Get or create visitor ID
@@ -289,6 +295,13 @@ Mohon konfirmasi pesanan saya. Terima kasih banyak!`;
         affiliate_id: orderData.affiliate_id,
         visitor_id: orderData.visitor_id
       });
+
+      // Mark referral as used after successful order creation
+      if (affiliateId) {
+        const { markReferralAsUsed } = require('@/utils/referralUtils');
+        markReferralAsUsed();
+        console.log('Referral code marked as used after order creation');
+      }
 
       // Upload payment proof if provided
       let paymentProofUrl = null;
