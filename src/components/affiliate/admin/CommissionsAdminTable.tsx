@@ -92,8 +92,8 @@ const CommissionsAdminTable = () => {
         title: 'Berhasil',
         description: 'Komisi berhasil disetujui',
       });
-      // Force refresh data after approval
-      window.location.reload();
+      // Don't force reload, let real-time updates handle it
+      console.log('Commission approved, waiting for real-time update');
     } catch (error) {
       console.error('Error approving commission:', error);
       toast({
@@ -119,8 +119,8 @@ const CommissionsAdminTable = () => {
       });
       setRejectionReason('');
       setSelectedCommissionId(null);
-      // Force refresh data after rejection
-      window.location.reload();
+      // Don't force reload, let real-time updates handle it
+      console.log('Commission rejected, waiting for real-time update');
     } catch (error) {
       console.error('Error rejecting commission:', error);
       toast({

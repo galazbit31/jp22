@@ -4,7 +4,7 @@ import { TrendingUp, Users, ShoppingCart, DollarSign, Clock, ExternalLink } from
 import { motion } from 'framer-motion';
 
 const AffiliateStats = () => {
-  const { affiliate, loading } = useAffiliate();
+  const { affiliate, loading, commissions } = useAffiliate();
 
   if (loading) {
     return (
@@ -27,6 +27,16 @@ const AffiliateStats = () => {
   if (!affiliate) {
     return null;
   }
+
+  // Calculate commission values from actual commission records for consistency
+  const pendingCommissions = commissions.filter(comm => comm.status === 'pending');
+  const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
+  const paidCommissions = commissions.filter(comm => comm.status === 'paid');
+  
+  const calculatedPendingCommission = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const calculatedApprovedCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const calculatedTotalCommission = calculatedPendingCommission + calculatedApprovedCommission + 
+                                   paidCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
 
   const stats = [
     {
@@ -51,7 +61,7 @@ const AffiliateStats = () => {
     },
     {
       title: 'Komisi Pending',
-      value: `¥${affiliate.pendingCommission.toLocaleString()}`,
+      value: `¥${calculatedPendingCommission.toLocaleString()}`,
       icon: Clock,
       color: 'bg-yellow-500 text-white',
       bgColor: 'bg-yellow-50',
@@ -61,13 +71,13 @@ const AffiliateStats = () => {
     },
     {
       title: 'Total Komisi',
-      value: `¥${affiliate.totalCommission.toLocaleString()}`,
+      value: `¥${calculatedTotalCommission.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-red-500 text-white',
       bgColor: 'bg-red-50',
       borderColor: 'border-red-200',
       description: 'Total komisi yang didapatkan',
-      change: `¥${affiliate.paidCommission.toLocaleString()} dibayarkan`
+      change: `¥${calculatedApprovedCommission.toLocaleString()} tersedia`
     }
   ];
 

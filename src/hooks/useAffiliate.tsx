@@ -451,14 +451,13 @@ export const AffiliateProvider = ({ children }: { children: React.ReactNode }) =
     }
 
     try {
-      // Calculate available commission (only approved, not pending)
+      // Calculate available commission from actual commission records for consistency
+      const pendingCommissions = commissions.filter(comm => comm.status === 'pending');
       const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
-      const availableCommission = approvedCommissions.reduce((sum, commission) => sum + commission.commissionAmount, 0);
+      const paidCommissions = commissions.filter(comm => comm.status === 'paid');
       
-      // Calculate true pending commission (only pending status, not approved)
-      // This ensures we don't double-count approved commissions
-      const pendingOnlyCommissions = commissions.filter(comm => comm.status === 'pending');
-      const pendingOnlyAmount = pendingOnlyCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+      const availableCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+      const pendingAmount = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
       
       // Check if affiliate has enough available commission
       if (availableCommission < amount) {
@@ -472,15 +471,9 @@ export const AffiliateProvider = ({ children }: { children: React.ReactNode }) =
         bankInfo
       );
       
-      // Update local state to reflect the reduced available commission
-      if (affiliate) {
-        setAffiliate({
-          ...affiliate,
-          // Update both pending and approved commission values
-          pendingCommission: Math.max(0, affiliate.pendingCommission + amount),
-          approved_commission: Math.max(0, affiliate.approved_commission - amount)
-        });
-      }
+      // Note: We don't update local state here anymore
+      // The real-time subscriptions will handle the updates
+      console.log(`Payout request ${payoutId} submitted successfully`);
       
       return payoutId;
     } catch (err) {

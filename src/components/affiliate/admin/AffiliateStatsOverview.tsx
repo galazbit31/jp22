@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AffiliateStatsOverview = () => {
-  const { affiliates, commissions, loading, selectedMonth, setSelectedMonth, availableMonths } = useAffiliateAdmin();
+  const { affiliates, commissions, referrals, loading, selectedMonth, setSelectedMonth, availableMonths } = useAffiliateAdmin();
 
   if (loading) {
     return (
@@ -41,11 +41,18 @@ const AffiliateStatsOverview = () => {
   
   const totalReferrals = affiliates.reduce((sum, affiliate) => sum + affiliate.totalReferrals, 0);
   
-  const totalCommission = affiliates.reduce((sum, affiliate) => sum + affiliate.totalCommission, 0);
+  // Calculate commission totals from actual commission records for consistency
+  const pendingCommissions = commissions.filter(comm => comm.status === 'pending');
+  const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
+  const paidCommissions = commissions.filter(comm => comm.status === 'paid');
   
-  const pendingCommission = affiliates.reduce((sum, affiliate) => sum + affiliate.pendingCommission, 0);
+  const totalCommission = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0) +
+                         approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0) +
+                         paidCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
   
-  const pendingCommissions = commissions.filter(commission => commission.status === 'pending').length;
+  const pendingCommission = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  
+  const pendingCommissionsCount = pendingCommissions.length;
 
   const stats = [
     {
@@ -74,7 +81,7 @@ const AffiliateStatsOverview = () => {
       value: `¥${pendingCommission.toLocaleString()}`,
       icon: ShoppingCart,
       color: 'bg-yellow-500',
-      description: `${pendingCommissions} komisi menunggu persetujuan`
+      description: `${pendingCommissionsCount} komisi menunggu persetujuan`
     },
     {
       title: 'Total Komisi',

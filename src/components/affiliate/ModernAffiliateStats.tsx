@@ -33,14 +33,19 @@ const ModernAffiliateStats = () => {
   // Calculate commission growth (mock data for now)
   const commissionGrowth = 12.5; // This would come from backend in a real implementation
   
-  // Calculate available commission (approved commissions only)
+  // Calculate commissions based on actual status from commissions array
+  const pendingCommissions = commissions.filter(comm => comm.status === 'pending');
   const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
-  const availableCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
-
-  // Calculate true pending commission (excluding approved commissions)
-  // Ensure it's never negative by using Math.max
-  const truePendingCommission = affiliate ? 
-    Math.max(0, affiliate.pendingCommission - availableCommission) : 0;
+  const paidCommissions = commissions.filter(comm => comm.status === 'paid');
+  
+  const calculatedPendingCommission = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const calculatedApprovedCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const calculatedPaidCommission = paidCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  
+  // Use calculated values instead of affiliate object values for consistency
+  const displayPendingCommission = calculatedPendingCommission;
+  const displayAvailableCommission = calculatedApprovedCommission;
+  const displayTotalCommission = calculatedPendingCommission + calculatedApprovedCommission + calculatedPaidCommission;
 
   const stats = [
     {
@@ -67,7 +72,7 @@ const ModernAffiliateStats = () => {
     },
     {
       title: 'Komisi Pending',
-      value: `¥${truePendingCommission.toLocaleString()}`,
+      value: `¥${displayPendingCommission.toLocaleString()}`,
       icon: Clock,
       color: 'bg-amber-500',
       textColor: 'text-amber-500',
@@ -78,14 +83,14 @@ const ModernAffiliateStats = () => {
     },
     {
       title: 'Komisi Tersedia',
-      value: `¥${availableCommission.toLocaleString()}`,
+      value: `¥${displayAvailableCommission.toLocaleString()}`,
       icon: DollarSign,
       color: 'bg-purple-500',
       textColor: 'text-purple-500',
       bgColor: 'bg-purple-50',
       borderColor: 'border-purple-100',
       growth: commissionGrowth,
-      description: `${approvedCommissionsCount} komisi sudah disetujui admin`
+      description: `${approvedCommissions.length} komisi sudah disetujui admin`
     }
   ];
 

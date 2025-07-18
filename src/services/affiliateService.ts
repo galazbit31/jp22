@@ -793,28 +793,10 @@ export const approveCommission = async (
       });
     }
     
-    // Update affiliate stats - move commission from pending to approved
-    // This is the critical part that was missing
-    try {
-      const affiliateRef = doc(db, AFFILIATES_COLLECTION, commission.affiliateId);
-      const affiliateDoc = await getDoc(affiliateRef);
-      
-      if (affiliateDoc.exists()) {
-        console.log('Updating affiliate stats for approved commission');
-        // Move commission from pending to approved by decreasing pendingCommission
-        // This will increase the available commission (total - pending)
-        await updateDoc(affiliateRef, {
-          pendingCommission: increment(-commission.commissionAmount),
-          approved_commission: increment(commission.commissionAmount),
-          updatedAt: new Date().toISOString()
-        });
-        console.log(`Decreased pendingCommission by ${commission.commissionAmount} for affiliate ${commission.affiliateId}`);
-      } else {
-        console.error('Affiliate not found for commission:', commission.affiliateId);
-      }
-    } catch (affiliateError) {
-      console.error('Error updating affiliate stats for approved commission:', affiliateError);
-    }
+    // Note: We're removing the automatic affiliate stats update here
+    // The stats will be calculated dynamically from commission records
+    // This ensures consistency between admin and user dashboards
+    console.log(`Commission ${commissionId} approved successfully`);
   } catch (error) {
     console.error('Error approving commission:', error);
     throw error;
@@ -862,12 +844,9 @@ export const rejectCommission = async (
       });
     }
     
-    // Update affiliate stats
-    await updateDoc(doc(db, AFFILIATES_COLLECTION, commission.affiliateId), {
-      pendingCommission: increment(-commission.commissionAmount),
-      // No need to change totalCommission as it should remain the same
-      updatedAt: new Date().toISOString()
-    });
+    // Note: We're removing the automatic affiliate stats update here
+    // The stats will be calculated dynamically from commission records
+    console.log(`Commission ${commissionId} rejected successfully`);
   } catch (error) {
     console.error('Error rejecting commission:', error);
     throw error;

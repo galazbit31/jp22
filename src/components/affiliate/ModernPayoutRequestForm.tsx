@@ -40,14 +40,18 @@ const ModernPayoutRequestForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   
-  // Calculate available commission (approved commissions only)
+  // Calculate commissions based on actual status from commissions array for consistency
+  const pendingCommissions = commissions.filter(comm => comm.status === 'pending');
   const approvedCommissions = commissions.filter(comm => comm.status === 'approved');
-  const availableCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const paidCommissions = commissions.filter(comm => comm.status === 'paid');
   
-  // Calculate true pending commission (excluding approved commissions)
-  // Ensure it's never negative by using Math.max
-  const truePendingCommission = affiliate ? 
-    Math.max(0, affiliate.pendingCommission - availableCommission) : 0;
+  const calculatedPendingCommission = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const calculatedApprovedCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  const calculatedPaidCommission = paidCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
+  
+  // Use calculated values for consistency with admin dashboard
+  const availableCommission = calculatedApprovedCommission;
+  const truePendingCommission = calculatedPendingCommission;
     
   // State for currency conversion
   const [selectedMethod, setSelectedMethod] = useState<string>('');
@@ -235,7 +239,7 @@ const ModernPayoutRequestForm = () => {
                   <span>Minimum Payout:</span>
                   <span className="font-medium">¥{minAmount.toLocaleString()}</span>
                 </li>
-                <li className="flex justify-between">
+                You have ¥{maxAmount.toLocaleString()} available for withdrawal from {approvedCommissions.length} approved commissions.
                   <span>Still Needed:</span>
                   <span className="font-medium text-amber-600">¥{Math.max(0, minAmount - maxAmount).toLocaleString()}</span>
                 </li>
