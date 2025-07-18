@@ -239,7 +239,7 @@ const ModernPayoutRequestForm = () => {
                   <span>Minimum Payout:</span>
                   <span className="font-medium">¥{minAmount.toLocaleString()}</span>
                 </li>
-                You have ¥{maxAmount.toLocaleString()} available for withdrawal from {approvedCommissions.length} approved commissions.
+                <li className="flex justify-between">
                   <span>Still Needed:</span>
                   <span className="font-medium text-amber-600">¥{Math.max(0, minAmount - maxAmount).toLocaleString()}</span>
                 </li>
