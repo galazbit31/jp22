@@ -42,6 +42,16 @@ const AffiliateStats = () => {
     {
       title: 'Total Klik',
       value: affiliate.totalClicks,
+  // Calculate actual referral counts from referrals array for accuracy
+  const actualTotalClicks = referrals.filter(ref => ref.status === 'clicked' || ref.status === 'registered' || ref.status === 'ordered' || ref.status === 'approved').length;
+  const actualTotalReferrals = referrals.filter(ref => 
+    ref.status === 'registered' || ref.status === 'ordered' || ref.status === 'approved'
+  ).length;
+  
+  // Use actual counts instead of affiliate object values for consistency
+  const displayTotalClicks = Math.max(actualTotalClicks, affiliate.totalClicks);
+  const displayTotalReferrals = Math.max(actualTotalReferrals, affiliate.totalReferrals);
+      value: displayTotalClicks,
       icon: TrendingUp,
       color: 'bg-blue-500 text-white',
       bgColor: 'bg-blue-50',
@@ -51,7 +61,7 @@ const AffiliateStats = () => {
     },
     {
       title: 'Total Referral',
-      value: affiliate.totalReferrals,
+      value: displayTotalReferrals,
       icon: Users,
       color: 'bg-green-500 text-white',
       bgColor: 'bg-green-50',

@@ -47,10 +47,25 @@ const ModernAffiliateStats = () => {
   const displayAvailableCommission = calculatedApprovedCommission;
   const displayTotalCommission = calculatedPendingCommission + calculatedApprovedCommission + calculatedPaidCommission;
 
+  // Calculate actual referral counts from referrals array for accuracy
+  const actualTotalClicks = referrals.filter(ref => ref.status === 'clicked' || ref.status === 'registered' || ref.status === 'ordered' || ref.status === 'approved').length;
+  const actualTotalReferrals = referrals.filter(ref => 
+    ref.status === 'registered' || ref.status === 'ordered' || ref.status === 'approved'
+  ).length;
+  
+  // Use actual counts instead of affiliate object values for consistency
+  const displayTotalClicks = Math.max(actualTotalClicks, affiliate.totalClicks);
+  const displayTotalReferrals = Math.max(actualTotalReferrals, affiliate.totalReferrals);
+  
+  // Recalculate conversion rate with actual data
+  const actualConversionRate = displayTotalClicks > 0 
+    ? ((displayTotalReferrals / displayTotalClicks) * 100).toFixed(1) 
+    : '0.0';
+
   const stats = [
     {
       title: 'Total Klik',
-      value: affiliate.totalClicks,
+      value: displayTotalClicks,
       icon: TrendingUp,
       color: 'bg-blue-500',
       textColor: 'text-blue-500',
@@ -61,7 +76,7 @@ const ModernAffiliateStats = () => {
     },
     {
       title: 'Total Referral',
-      value: affiliate.totalReferrals,
+      value: displayTotalReferrals,
       icon: Users,
       color: 'bg-green-500',
       textColor: 'text-green-500',
