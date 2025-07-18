@@ -122,6 +122,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
       
       // Update user profile with full name
+      // Check if this email should be admin
+      const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
+      const userRole = adminEmails.includes(email) ? 'admin' : 'user';
+
       if (user) {
         await updateProfile(user, {
           displayName: fullName
@@ -132,7 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { error: null };
     } catch (error: any) {
       console.error('Firebase sign up error:', {
-        code: error.code,
+        role: userRole,
         message: error.message,
         email
       });
