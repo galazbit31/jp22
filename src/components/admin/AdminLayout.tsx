@@ -1,6 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useFirebaseAuth';
 import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/config/firebase';
 import RealtimeClock from './RealtimeClock';
 import AdminSidebar from './AdminSidebar';
 
@@ -15,7 +17,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    const checkAdminStatus = () => {
+    const checkAdminStatus = async () => {
       console.log('Environment check:', {
         isDev: window.location.hostname === 'localhost',
         isProd: window.location.hostname.includes('vercel.app') || window.location.hostname.includes('.app'),
@@ -26,24 +28,51 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       if (user) {
         console.log('Checking admin status for user:', user.email);
         
-        // Enhanced admin emails list with additional admin
-        const adminEmails = [
-          'admin@gmail.com', 
-          'ari4rich@gmail.com',
-          'newadmin@gmail.com',
-          'injpn@food.com',
-          'admin2@gmail.com'
-        ];
-        
-        const userIsAdmin = adminEmails.includes(user.email || '');
-        
-        console.log('Admin check result:', {
-          userEmail: user.email,
-          isAdmin: userIsAdmin,
-          adminEmails
-        });
-        
-        setIsAdmin(userIsAdmin);
+        // Check admin status from Firestore
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const userIsAdmin = userData.role === 'admin';
+            
+            console.log('Admin check result from Firestore:', {
+              userEmail: user.email,
+              userRole: userData.role,
+              isAdmin: userIsAdmin,
+              firestoreData: userData
+            });
+            
+            setIsAdmin(userIsAdmin);
+          } else {
+            console.log('User document not found in Firestore');
+            // Fallback to email check
+            const adminEmails = [
+              'admin@gmail.com', 
+              'ari4rich@gmail.com',
+              'newadmin@gmail.com',
+              'injpn@food.com',
+              'admin2@gmail.com'
+            ];
+            
+            const userIsAdmin = adminEmails.includes(user.email || '');
+            setIsAdmin(userIsAdmin);
+          }
+        } catch (error) {
+          console.error('Error checking admin status from Firestore:', error);
+          // Fallback to email check
+          const adminEmails = [
+            'admin@gmail.com', 
+            'ari4rich@gmail.com',
+            'newadmin@gmail.com',
+            'injpn@food.com',
+            'admin2@gmail.com'
+          ];
+          
+          const userIsAdmin = adminEmails.includes(user.email || '');
+          setIsAdmin(userIsAdmin);
+        }
       } else {
         console.log('No user found');
         setIsAdmin(false);

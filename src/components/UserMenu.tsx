@@ -2,6 +2,8 @@ import { LogOut, User, ShoppingBag, Settings, Percent } from 'lucide-react';
 import { useAuth } from '@/hooks/useFirebaseAuth';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/config/firebase';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,14 +20,39 @@ const UserMenu = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    // For Firebase, you can check admin status based on custom claims or a separate admin list
-    // For now, we'll set a simple check - you can modify this based on your needs
-    const checkAdminStatus = () => {
+    const checkAdminStatus = async () => {
       if (user) {
-        // You can implement custom claims or check against a list of admin emails
-        // For demo purposes, let's check if email contains 'admin'
-        const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com'];
-        setIsAdmin(adminEmails.includes(user.email || ''));
+        try {
+          // Check admin status from Firestore
+          const userRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setIsAdmin(userData.role === 'admin');
+          } else {
+            // Fallback to email check
+            const adminEmails = [
+              'admin@gmail.com', 
+              'ari4rich@gmail.com',
+              'newadmin@gmail.com',
+              'injpn@food.com',
+              'admin2@gmail.com'
+            ];
+            setIsAdmin(adminEmails.includes(user.email || ''));
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          // Fallback to email check
+          const adminEmails = [
+            'admin@gmail.com', 
+            'ari4rich@gmail.com',
+            'newadmin@gmail.com',
+            'injpn@food.com',
+            'admin2@gmail.com'
+          ];
+          setIsAdmin(adminEmails.includes(user.email || ''));
+        }
       }
     };
 
