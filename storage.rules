@@ -1,18 +1,38 @@
-
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow read access to product images for everyone
-    // Allow write access for authenticated users
+    // Product images - Public read, authenticated admin write
     match /product-images/{allPaths=**} {
       allow read: if true;
-      allow write, create, update, delete: if request.auth != null;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow authenticated users to upload and manage any files
+    // Payment proofs - Users can upload their own, admins can manage all
+    match /payment-proofs/{allPaths=**} {
+      allow read: if request.auth != null && (isAdmin() || isOwner());
+      allow write, create: if request.auth != null;
+      allow update, delete: if request.auth != null && isAdmin();
+    }
+    
+    // General uploads - Authenticated users only
     match /{allPaths=**} {
-      allow read: if true;
-      allow write, create, update, delete: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
+    }
+    
+    // Helper functions
+    function isAdmin() {
+      return request.auth != null && 
+        (request.auth.token.email == 'admin@gmail.com' || 
+         request.auth.token.email == 'ari4rich@gmail.com' ||
+         request.auth.token.email == 'newadmin@gmail.com' ||
+         request.auth.token.email == 'injpn@food.com' ||
+         request.auth.token.email == 'admin2@gmail.com');
+    }
+    
+    function isOwner() {
+      return request.auth != null && 
+        resource.metadata.customMetadata.uploadedBy == request.auth.uid;
     }
   }
 }

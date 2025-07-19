@@ -1,110 +1,105 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read access to products for everyone, write/delete for authenticated users
+    // Products - Public read, authenticated write
     match /products/{productId} {
       allow read: if true;
-      allow write, create, update, delete: if request.auth != null;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow authenticated users to read all users, but only write to their own data
+    // Users - Authenticated users can read all, but only write to their own data or admins can write any
     match /users/{userId} {
       allow read: if request.auth != null;
       allow write, create, update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if request.auth != null && isAdmin();
     }
     
-    // Allow anyone to create orders, authenticated users to read their own orders, and admins to access all orders
+    // Orders - Users can read their own orders, admins can read all
     match /orders/{orderId} {
       allow read, list: if request.auth != null && (isAdmin() || resource.data.user_id == request.auth.uid);
-      allow create: if true; // Allow anyone to create orders
-      allow update, delete: if request.auth != null && (isAdmin() || resource.data.user_id == request.auth.uid);
+      allow create: if true; // Allow guest orders
+      allow update, delete: if request.auth != null && isAdmin();
     }
     
-    // AFFILIATE COLLECTIONS - FULLY PERMISSIVE
-    // Allow anyone to read/write affiliate referrals
+    // AFFILIATE COLLECTIONS - Restricted permissions
     match /affiliate_referrals/{referralId} {
-      allow read, write, create, update, delete: if true;
+      allow read: if true; // Public read for tracking
+      allow create: if true; // Allow anonymous referral creation
+      allow update, delete: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.referrer_id);
     }
     
-    // Allow anyone to read/write affiliate commissions
     match /affiliate_commissions/{commissionId} {
-      allow read, write, create, update, delete: if true;
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.affiliate_id);
+      allow create: if true; // System can create commissions
+      allow update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow anyone to read/write affiliate settings
     match /affiliate_settings/{settingId} {
-      allow read, write, create, update, delete: if true;
+      allow read: if true; // Public read for commission rates
+      allow write, create, update, delete: if request.auth != null && isAdmin();
     }
 
-    // Allow anyone to read/write affiliate payouts
     match /affiliate_payouts/{payoutId} {
-      allow read, write, create, update, delete: if true;
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.affiliate_id);
+      allow create: if request.auth != null; // Authenticated users can request payouts
+      allow update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow anyone to read/write affiliates collection
     match /affiliates/{affiliateId} {
-      allow read, write, create, update, delete: if true;
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid == affiliateId);
+      allow create: if request.auth != null && request.auth.uid == affiliateId;
+      allow update: if request.auth != null && (isAdmin() || request.auth.uid == affiliateId);
+      allow delete: if request.auth != null && isAdmin();
     }
     
-    // Allow authenticated users to access recycle bin with full permissions
+    // Admin-only collections
     match /recycle_bin/{itemId} {
       allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow authenticated users to manage admin logs
     match /admin_logs/{logId} {
-      allow read, write, create, update, delete: if request.auth != null;
+      allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow authenticated users to manage shipping rates
+    // Shipping rates - Public read, admin write
     match /shipping_rates/{rateId} {
       allow read: if true;
-      allow write, create, update, delete: if request.auth != null;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
     }
 
-    // Allow anyone to create payment proofs
-    // Admins can read, write, delete all payment proofs
+    // Payment proofs - Users can create their own, admins can manage all
     match /payment_proofs/{paymentProofId} {
-      allow read, create: if true;
-      allow update, delete: if request.auth != null;
+      allow read: if request.auth != null && (isAdmin() || request.auth.uid == resource.data.user_id);
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow anyone to read categories with explicit permissions
+    // Categories - Public read, admin write
     match /categories/{categoryId} {
-      allow get, list, read: if true;
+      allow read, list: if true;
       allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow POS transactions to be read/written by authenticated users (admins only for financial reports)
+    // Financial data - Admin only
     match /pos_transactions/{transactionId} {
-      allow read, list: if request.auth != null && isAdmin();
-      allow write, create, update, delete: if request.auth != null;
+      allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow access to financial data collections for admins
     match /financial_transactions/{transactionId} {
       allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow access to daily sales data for admins
     match /daily_sales/{dateId} {
       allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow access to monthly financial data for admins
     match /monthly_financial_data/{monthId} {
       allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
-    // Allow authenticated users to read COD settings, admins to write
+    // COD settings - Public read, admin write
     match /cod_settings/{documentId} {
-      allow read: if request.auth != null;
-      allow write, create, update, delete: if request.auth != null && isAdmin();
-    }
-    
-    // Allow anyone to read categories
-    match /categories/{categoryId} {
-      allow read, list: if true;
+      allow read: if true;
       allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
@@ -116,6 +111,13 @@ service cloud.firestore {
          request.auth.token.email == 'newadmin@gmail.com' ||
          request.auth.token.email == 'injpn@food.com' ||
          request.auth.token.email == 'admin2@gmail.com');
+    }
+    
+    // Validate admin role from user document
+    function isAdminFromUserDoc() {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
   }
 }

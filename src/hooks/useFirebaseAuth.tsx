@@ -9,9 +9,11 @@ import {
   User,
   updateProfile,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  sendEmailVerification
 } from 'firebase/auth';
 import { firebaseConfig } from '@/config/env';
+import { validateInput, sanitizeInput, isAdminEmail } from '@/utils/security';
 
 interface AuthContextType {
   user: User | null; 
@@ -117,19 +119,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return { error: new Error('Firebase auth not initialized') };
     }
 
+    // Validate inputs
+    if (!validateInput.email(email)) {
+      return { error: new Error('Invalid email format') };
+    }
+    
+    if (password.length < 6) {
+      return { error: new Error('Password must be at least 6 characters') };
+    }
+    
+    if (!validateInput.text(fullName, 100)) {
+      return { error: new Error('Invalid name format') };
+    }
     try {
       console.log('Attempting Firebase sign up with email:', email);
-      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+      const { user } = await createUserWithEmailAndPassword(auth, sanitizeInput(email), password);
       
       // Update user profile with full name
       // Check if this email should be admin
-      const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
-      const userRole = adminEmails.includes(email) ? 'admin' : 'user';
+      const userRole = isAdminEmail(email) ? 'admin' : 'user';
 
       if (user) {
         await updateProfile(user, {
-          displayName: fullName
+          displayName: sanitizeInput(fullName)
         });
+        
+        // Send email verification for non-admin users
+        if (userRole !== 'admin') {
+          try {
+            await sendEmailVerification(user);
+            console.log('Email verification sent');
+          } catch (verificationError) {
+            console.warn('Failed to send email verification:', verificationError);
+          }
+        }
+        
         console.log('Sign up successful and profile updated:', user.email);
       }
       

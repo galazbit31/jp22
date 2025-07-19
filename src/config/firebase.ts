@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, enableIndexedDbPersistence, initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, initializeFirestore, CACHE_SIZE_UNLIMITED, connectFirestoreEmulator } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { firebaseConfig } from '@/config/env';
 
@@ -33,10 +33,17 @@ try {
     db = initializeFirestore(app, {
       cacheSizeBytes: CACHE_SIZE_UNLIMITED,
       experimentalAutoDetectLongPolling: true, // Auto-detect best connection method
+      ignoreUndefinedProperties: true, // Ignore undefined properties to prevent errors
     });
     
     // Initialize storage
     storage = getStorage(app);
+    
+    // Connect to Firestore emulator in development (optional)
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      // Uncomment the line below if you want to use Firestore emulator in development
+      // connectFirestoreEmulator(db, 'localhost', 8080);
+    }
     
     // Enable offline persistence for Firestore
     if (typeof window !== 'undefined' && !window.location.href.includes('localhost')) {
