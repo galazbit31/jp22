@@ -96,6 +96,12 @@ service cloud.firestore {
       allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
+    // Allow authenticated users to read COD settings, admins to write
+    match /cod_settings/{documentId} {
+      allow read: if request.auth != null;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
+    }
+    
     // Allow anyone to read categories
     match /categories/{categoryId} {
       allow read, list: if true;
