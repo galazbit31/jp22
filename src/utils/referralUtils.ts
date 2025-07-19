@@ -1,37 +1,50 @@
 import { trackReferralClick, registerWithReferral } from '@/services/affiliateService';
 import { auth } from '@/config/firebase';
 
+// Session-based referral storage (temporary, cleared on browser close)
+const SESSION_REFERRAL_KEY = 'currentSessionReferral';
+const SESSION_TIMESTAMP_KEY = 'currentSessionReferralTimestamp';
+
 // Get referral code from URL
 export const getReferralCodeFromUrl = (): string | null => {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('ref');
 };
 
-// Store referral code in localStorage
+// Store referral code in sessionStorage (only for current session)
 export const storeReferralCode = (referralCode: string): void => {
-  localStorage.setItem('referralCode', referralCode);
-  localStorage.setItem('referralTimestamp', Date.now().toString());
-  localStorage.setItem('referralUsed', 'false'); // Track if referral has been used
-  console.log(`Stored referral code in localStorage: ${referralCode}`);
-};
-
-// Get stored referral code
-export const getStoredReferralCode = (): string | null => {
-  return localStorage.getItem('referralCode');
-};
-
-// Check if referral code is still valid (within 30 days)
-export const isReferralCodeValid = (): boolean => {
-  const timestamp = localStorage.getItem('referralTimestamp');
-  const isUsed = localStorage.getItem('referralUsed') === 'true';
+  // Clear any old persistent referral data
+  clearPersistentReferralData();
   
-  // If referral has been used, it's no longer valid
-  if (isUsed) {
-    console.log('Referral code has already been used');
+  // Store in sessionStorage (cleared when browser/tab closes)
+  sessionStorage.setItem(SESSION_REFERRAL_KEY, referralCode);
+  sessionStorage.setItem(SESSION_TIMESTAMP_KEY, Date.now().toString());
+  console.log(`Stored referral code in sessionStorage for current session: ${referralCode}`);
+};
+
+// Clear persistent referral data from localStorage
+const clearPersistentReferralData = (): void => {
+  localStorage.removeItem('referralCode');
+  localStorage.removeItem('referralTimestamp');
+  localStorage.removeItem('referralUsed');
+  console.log('Cleared persistent referral data from localStorage');
+};
+
+// Get stored referral code from current session only
+export const getStoredReferralCode = (): string | null => {
+  return sessionStorage.getItem(SESSION_REFERRAL_KEY);
+};
+
+// Check if referral code is still valid (within current session and time limit)
+export const isReferralCodeValid = (): boolean => {
+  const timestamp = sessionStorage.getItem(SESSION_TIMESTAMP_KEY);
+  const referralCode = sessionStorage.getItem(SESSION_REFERRAL_KEY);
+  
+  // No referral code in current session
+  if (!referralCode || !timestamp) {
+    console.log('No referral code in current session');
     return false;
   }
-  
-  if (!timestamp) return false;
   
   const referralDate = new Date(parseInt(timestamp));
   const now = new Date();
@@ -40,29 +53,39 @@ export const isReferralCodeValid = (): boolean => {
   const diffTime = now.getTime() - referralDate.getTime();
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
   
-  // Valid for 7 days only (reduced from 30 days)
-  const isWithinTimeLimit = diffDays <= 7;
+  // Valid for current session and within 1 day only
+  const isWithinTimeLimit = diffDays <= 1;
   
   if (!isWithinTimeLimit) {
-    console.log('Referral code has expired (7 days limit)');
-    clearReferralCode();
+    console.log('Referral code has expired (1 day limit)');
+    clearCurrentSessionReferral();
+    return false;
   }
   
   return isWithinTimeLimit;
 };
 
-// Mark referral code as used (for first purchase only)
-export const markReferralAsUsed = (): void => {
-  localStorage.setItem('referralUsed', 'true');
-  console.log('Referral code marked as used');
+// Clear current session referral (after successful order)
+export const clearCurrentSessionReferral = (): void => {
+  sessionStorage.removeItem(SESSION_REFERRAL_KEY);
+  sessionStorage.removeItem(SESSION_TIMESTAMP_KEY);
+  console.log('Cleared current session referral');
 };
 
-// Clear referral code from localStorage
+// Clear referral code from both session and persistent storage
 export const clearReferralCode = (): void => {
-  localStorage.removeItem('referralCode');
-  localStorage.removeItem('referralTimestamp');
-  localStorage.removeItem('referralUsed');
-  console.log('Referral code cleared from localStorage');
+  clearCurrentSessionReferral();
+  clearPersistentReferralData();
+  console.log('Cleared all referral data');
+};
+
+// Check if user accessed via referral link in current session
+export const hasActiveReferralSession = (): boolean => {
+  const referralCode = getStoredReferralCode();
+  const isValid = isReferralCodeValid();
+  
+  console.log('Checking active referral session:', { referralCode, isValid });
+  return !!(referralCode && isValid);
 };
 
 // Track referral click
@@ -118,6 +141,10 @@ export const processReferralCode = async (): Promise<void> => {
     
     if (referralCode) {
       console.log('Found referral code in URL:', referralCode);
+      
+      // Clear any existing referral data first
+      clearReferralCode();
+      
       try {
         await trackReferral(referralCode);
       } catch (error) {
@@ -127,6 +154,14 @@ export const processReferralCode = async (): Promise<void> => {
       }
     } else {
       console.log('No referral code found in URL');
+      
+      // If no referral code in URL, ensure no old referral data persists
+      // Only clear persistent data, keep session data if user is in middle of session
+      const hasActiveSession = hasActiveReferralSession();
+      if (!hasActiveSession) {
+        clearReferralCode();
+        console.log('No active referral session, cleared any old referral data');
+      }
     }
   } catch (error) {
     console.error('Error processing referral code:', error);

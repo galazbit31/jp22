@@ -167,22 +167,12 @@ export const createOrder = async (orderData: {
       visitor_id: orderData.visitor_id || null
     };
     
-    // Get affiliate_id from localStorage if not provided
-    const storedAffiliateId = localStorage.getItem('referralCode');
-    
-    // Validate referral code before using it
+    // Only use affiliate_id if explicitly provided (from active session)
     let affiliate_id = sanitizedOrderData.affiliate_id || null;
-    if (!affiliate_id && storedAffiliateId) {
-      try {
-        const { isReferralCodeValid } = await import('@/utils/referralUtils');
-        if (isReferralCodeValid()) {
-          affiliate_id = storedAffiliateId;
-        } else {
-          console.log('Stored referral code is no longer valid, not using for order');
-        }
-      } catch (error) {
-        console.error('Error validating referral code:', error);
-      }
+    
+    // Don't automatically pull from storage - only use if explicitly provided
+    if (!affiliate_id) {
+      console.log('No affiliate_id provided - this is a direct/organic order');
     }
     
     console.log('Using affiliate_id for order:', affiliate_id);

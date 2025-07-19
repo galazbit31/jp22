@@ -55,7 +55,7 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
   const [affiliateId, setAffiliateId] = useState<string | null>(null);
   const [visitorId, setVisitorId] = useState<string | null>(null);
 
-  const form = useForm<CheckoutFormData>({
+  // Get affiliate_id only if there's an active referral session
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: '',
@@ -92,14 +92,15 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
 
   // Get affiliate ID from localStorage if not provided
   useEffect(() => {
-    // Import referral utilities
-    import('@/utils/referralUtils').then(({ getStoredReferralCode, isReferralCodeValid }) => {
-      const storedAffiliateId = getStoredReferralCode();
-      if (storedAffiliateId && isReferralCodeValid()) {
+    // Import referral utilities and check for active session
+    import('@/utils/referralUtils').then(({ hasActiveReferralSession, getStoredReferralCode }) => {
+      // Only use referral if there's an active session (user came via referral link)
+      if (hasActiveReferralSession()) {
+        const storedAffiliateId = getStoredReferralCode();
         console.log('Found affiliate ID in localStorage:', storedAffiliateId);
         setAffiliateId(storedAffiliateId);
       } else if (storedAffiliateId && !isReferralCodeValid()) {
-        console.log('Referral code found but no longer valid (expired or used)');
+        console.log('No active referral session - user accessed directly');
         setAffiliateId(null);
       }
     });
@@ -296,11 +297,11 @@ Mohon konfirmasi pesanan saya. Terima kasih banyak!`;
         visitor_id: orderData.visitor_id
       });
 
-      // Mark referral as used after successful order creation
+      // Clear referral session after successful order creation
       if (affiliateId) {
-        const { markReferralAsUsed } = require('@/utils/referralUtils');
-        markReferralAsUsed();
-        console.log('Referral code marked as used after order creation');
+        const { clearCurrentSessionReferral } = await import('@/utils/referralUtils');
+        clearCurrentSessionReferral();
+        console.log('Referral session cleared after order creation');
       }
 
       // Upload payment proof if provided

@@ -214,7 +214,7 @@ export const AffiliateProvider = ({ children }: { children: React.ReactNode }) =
                 totalOrders: ref.status === 'ordered' || ref.status === 'approved' ? 1 : 0,
                 totalSpent: ref.orderTotal || 0,
                 firstOrderDate: ref.orderedAt || '',
-                lastOrderDate: ref.orderedAt || '',
+      if (referralCode) {
                 createdAt: ref.createdAt
               }));
             
@@ -224,6 +224,11 @@ export const AffiliateProvider = ({ children }: { children: React.ReactNode }) =
             }
             setFollowers(followersData);
           } catch (followersError) {
+          
+          // Clear referral session after successful registration
+          const { clearCurrentSessionReferral } = await import('@/utils/referralUtils');
+          clearCurrentSessionReferral();
+          console.log('Referral session cleared after registration');
             console.error('Error loading followers data:', followersError);
             // Don't fail the entire data loading if followers fail
           }
