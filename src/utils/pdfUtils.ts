@@ -20,15 +20,17 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
     let canvas;
     try {
       canvas = await html2canvas(element, {
-        scale: 2, // Higher resolution
+        scale: 1.5, // Balanced resolution for better performance
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
+        width: Math.min(element.scrollWidth, 794), // A4 width in pixels at 96 DPI
+        height: Math.min(element.scrollHeight, 1123), // A4 height in pixels at 96 DPI
         scrollX: 0,
-        scrollY: 0
+        scrollY: 0,
+        windowWidth: 794,
+        windowHeight: 1123
       });
     } catch (canvasError) {
       console.error('Error creating canvas:', canvasError);
@@ -44,7 +46,12 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
     
     // Calculate image dimensions to fit A4
     const imgWidth = pdfWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let imgHeight = (canvas.height * imgWidth) / canvas.width;
+    
+    // If image height exceeds A4 height, scale it down
+    if (imgHeight > pdfHeight - 20) { // Leave 20mm margin
+      imgHeight = pdfHeight - 20;
+    }
     
     // Create PDF and add content with error handling
     try {
@@ -87,10 +94,10 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
         
           // Add logo to PDF
           const logoData = logoCanvas.toDataURL('image/png');
-          const logoWidth = 30; // in mm
-          const logoHeight = 30; // in mm
+          const logoWidth = 20; // in mm
+          const logoHeight = 20; // in mm
           const logoX = (pdfWidth - logoWidth) / 2; // Center horizontally
-          pdf.addImage(logoData, 'PNG', logoX, 5, logoWidth, logoHeight);
+          pdf.addImage(logoData, 'PNG', logoX, 10, logoWidth, logoHeight);
         } catch (logoError) {
           console.warn('Could not add logo to PDF:', logoError);
           // Continue without logo if there's an error
@@ -101,7 +108,7 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
       }
       
       // Add image to PDF, centered and scaled to fit
-      pdf.addImage(imgData, 'PNG', 0, 40, imgWidth, Math.min(imgHeight, pdfHeight - 40));
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       
       // Download the PDF
       pdf.save(`Invoice-${invoiceNumber}.pdf`);

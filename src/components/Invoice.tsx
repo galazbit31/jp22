@@ -17,73 +17,103 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 shadow-lg print-container" id="invoice-content">
+    <div className="max-w-4xl mx-auto bg-white p-6 shadow-lg print-container" id="invoice-content">
       {/* Print-specific styles */}
       <style>
         {`
           @media print {
             @page {
               size: A4;
-              margin: 0;
+              margin: 10mm;
             }
             body {
               margin: 0;
               padding: 0;
-              width: 210mm;
-              height: 297mm;
-              font-size: 12px;
+              font-size: 11px;
               font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+              line-height: 1.3;
             }
             .print-container {
               width: 100%;
               max-width: 100%;
-              padding: 15mm;
+              padding: 0;
               margin: 0;
               box-shadow: none;
               background-color: white !important;
               color: black !important;
-              page-break-after: always;
+              font-size: 11px;
             }
             .page-break-avoid {
               page-break-inside: avoid;
+              break-inside: avoid;
             }
             table {
               page-break-inside: avoid;
+              break-inside: avoid;
+              font-size: 10px;
             }
             tr {
               page-break-inside: avoid;
+              break-inside: avoid;
+            }
+            .invoice-header {
+              margin-bottom: 15px;
+            }
+            .invoice-section {
+              margin-bottom: 12px;
+            }
+            .invoice-table {
+              font-size: 9px;
+            }
+            .invoice-footer {
+              margin-top: 15px;
+              font-size: 9px;
             }
             * {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
               color-adjust: exact !important;
             }
+            img {
+              max-width: 100% !important;
+              height: auto !important;
+              display: block !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
           }
         `}
       </style>
 
       {/* Header with Logo and Title */}
-      <div className="flex justify-between items-center border-b-2 border-gray-200 pb-4 mb-6 page-break-avoid">
+      <div className="flex justify-between items-center border-b-2 border-gray-200 pb-3 mb-4 page-break-avoid invoice-header">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 rounded-full overflow-hidden">
+          <div className="w-12 h-12 rounded-full overflow-hidden">
             <img 
               src="/logo.png" 
               alt="Injapan Food Logo" 
-              className="w-full h-full object-contain bg-white p-1"
+              className="w-full h-full object-contain bg-white p-0.5"
+              style={{ 
+                maxWidth: '100%', 
+                height: 'auto',
+                display: 'block',
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact'
+              }}
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Injapan Food</h1>
-            <p className="text-gray-600">Makanan Indonesia di Jepang</p>
+            <h1 className="text-xl font-bold text-gray-900">Injapan Food</h1>
+            <p className="text-sm text-gray-600">Makanan Indonesia di Jepang</p>
           </div>
         </div>
         <div className="text-right">
-          <h2 className="text-4xl font-bold text-red-600">INVOICE</h2>
+          <h2 className="text-2xl font-bold text-red-600">INVOICE</h2>
         </div>
       </div>
 
       {/* Contact Information */}
-      <div className="flex justify-between text-sm text-gray-600 mb-6 border-b pb-4">
+      <div className="flex justify-between text-xs text-gray-600 mb-4 border-b pb-2 invoice-section">
         <div className="flex items-center space-x-2">
           <span>📱 WhatsApp: +817084894699</span>
         </div>
@@ -93,10 +123,10 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
       </div>
 
       {/* Invoice and Customer Info */}
-      <div className="grid grid-cols-2 gap-8 mb-8 page-break-avoid">
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Informasi Invoice</h3>
-          <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-4 mb-4 page-break-avoid invoice-section">
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <h3 className="text-base font-semibold text-gray-900 mb-2">Informasi Invoice</h3>
+          <div className="space-y-1 text-xs">
             <div className="flex justify-between">
               <span className="font-medium">No. Invoice:</span>
               <span className="text-red-600 font-bold">{invoiceNumber}</span>
@@ -146,9 +176,9 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
           </div>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">Informasi Penerima</h3>
-          <div className="space-y-2">
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <h3 className="text-base font-semibold text-gray-900 mb-2">Informasi Penerima</h3>
+          <div className="space-y-1 text-xs">
             <div className="flex justify-between">
               <span className="font-medium">Nama:</span>
               <span>{order.customer_info.name}</span>
@@ -178,35 +208,35 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
       </div>
 
       {/* Items Table */}
-      <div className="mb-8 page-break-avoid">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Detail Pesanan</h3>
-        <table className="w-full border-collapse">
+      <div className="mb-4 page-break-avoid invoice-section">
+        <h3 className="text-base font-semibold text-gray-900 mb-2">Detail Pesanan</h3>
+        <table className="w-full border-collapse invoice-table">
           <thead>
             <tr className="bg-gray-50">
-              <th className="border border-gray-300 px-4 py-2 text-left font-semibold">No.</th>
-              <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Produk</th>
-              <th className="border border-gray-300 px-4 py-2 text-center font-semibold">Qty</th>
-              <th className="border border-gray-300 px-4 py-2 text-right font-semibold">Harga Satuan</th>
-              <th className="border border-gray-300 px-4 py-2 text-right font-semibold">Subtotal</th>
+              <th className="border border-gray-300 px-2 py-1 text-left font-semibold text-xs">No.</th>
+              <th className="border border-gray-300 px-2 py-1 text-left font-semibold text-xs">Produk</th>
+              <th className="border border-gray-300 px-2 py-1 text-center font-semibold text-xs">Qty</th>
+              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-xs">Harga Satuan</th>
+              <th className="border border-gray-300 px-2 py-1 text-right font-semibold text-xs">Subtotal</th>
             </tr>
           </thead>
           <tbody>
             {order.items.map((item, index) => (
               <tr key={index} className="hover:bg-gray-50">
-                <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
-                <td className="border border-gray-300 px-4 py-2">
+                <td className="border border-gray-300 px-2 py-1 text-center text-xs">{index + 1}</td>
+                <td className="border border-gray-300 px-2 py-1 text-xs">
                   <div>
                     <div className="font-medium">{item.name}</div>
                     {item.selectedVariants && Object.keys(item.selectedVariants).length > 0 && (
-                      <div className="text-xs text-gray-600 mt-1">
+                      <div className="text-xs text-gray-600">
                         {Object.entries(item.selectedVariants).map(([type, value]) => `${type}: ${value}`).join(', ')}
                       </div>
                     )}
                   </div>
                 </td>
-                <td className="border border-gray-300 px-4 py-2 text-center">{item.quantity}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right">{formatPrice(item.price)}</td>
-                <td className="border border-gray-300 px-4 py-2 text-right font-medium">
+                <td className="border border-gray-300 px-2 py-1 text-center text-xs">{item.quantity}</td>
+                <td className="border border-gray-300 px-2 py-1 text-right text-xs">{formatPrice(item.price)}</td>
+                <td className="border border-gray-300 px-2 py-1 text-right font-medium text-xs">
                   {formatPrice(item.price * item.quantity)}
                 </td>
               </tr>
@@ -216,20 +246,20 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
       </div>
 
       {/* Total Section */}
-      <div className="flex justify-end mb-8 page-break-avoid">
-        <div className="w-64">
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <div className="space-y-2">
-              <div className="flex justify-between text-base">
+      <div className="flex justify-end mb-4 page-break-avoid invoice-section">
+        <div className="w-48">
+          <div className="bg-gray-50 p-3 rounded-lg border">
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
                 <span className="font-medium">Subtotal:</span>
                 <span>{formatPrice(order.total_price - (order.shipping_fee || 0))}</span>
               </div>
-              <div className="flex justify-between text-base">
+              <div className="flex justify-between">
                 <span>Ongkos Kirim:</span>
                 <span>{order.shipping_fee ? formatPrice(order.shipping_fee) : 'Akan dikonfirmasi'}</span>
               </div>
-              <div className="border-t pt-2 mt-2">
-                <div className="flex justify-between text-xl font-bold text-red-600">
+              <div className="border-t pt-1 mt-1">
+                <div className="flex justify-between text-sm font-bold text-red-600">
                   <span>Total Belanja:</span>
                   <span>{formatPrice(order.total_price)}</span>
                 </div>
@@ -241,20 +271,20 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Payment Method Information */}
       {order.customer_info.payment_method && (
-        <div className="mb-8 page-break-avoid">
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h4 className="font-medium text-blue-800 mb-2">Informasi Pembayaran:</h4>
-            <p className="text-blue-700 font-medium">{order.customer_info.payment_method}</p>
+        <div className="mb-4 page-break-avoid invoice-section">
+          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-800 mb-1 text-sm">Informasi Pembayaran:</h4>
+            <p className="text-blue-700 font-medium text-xs">{order.customer_info.payment_method}</p>
             
             {order.customer_info.payment_method === 'Bank Transfer (Rupiah)' && (
-              <div className="mt-2 text-blue-700">
+              <div className="mt-1 text-blue-700 text-xs">
                 <p><span className="font-medium">Nama Penerima:</span> PT. Injapan Shop</p>
                 <p><span className="font-medium">Nomor Rekening:</span> 1234567890 (BCA)</p>
               </div>
             )}
             
             {order.customer_info.payment_method === 'Bank Transfer (Yucho / ゆうちょ銀行)' && (
-              <div className="mt-2 text-blue-700">
+              <div className="mt-1 text-blue-700 text-xs">
                 <p><span className="font-medium">Nama Penerima:</span> Heri Kurnianta</p>
                 <p><span className="font-medium">Account Number:</span> 22210551</p>
                 <p><span className="font-medium">Nama Bank:</span> BANK POST</p>
@@ -265,7 +295,7 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
             )}
             
             {order.customer_info.payment_method === 'QRIS / QR Code' && (
-              <div className="mt-2 text-blue-700">
+              <div className="mt-1 text-blue-700 text-xs">
                 <p><span className="font-medium">Metode:</span> QRIS / QR Code</p>
                 <p><span className="font-medium">Status:</span> {order.payment_status === 'verified' ? 'Terverifikasi' : order.payment_status === 'rejected' ? 'Ditolak' : 'Menunggu Verifikasi'}</p>
               </div>
@@ -276,10 +306,10 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Affiliate Information (if available) */}
       {order.affiliate_id && (
-        <div className="mb-8 page-break-avoid">
-          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-            <h4 className="font-medium text-green-800 mb-2">Informasi Referral:</h4>
-            <p className="text-green-700">
+        <div className="mb-4 page-break-avoid invoice-section">
+          <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+            <h4 className="font-medium text-green-800 mb-1 text-sm">Informasi Referral:</h4>
+            <p className="text-green-700 text-xs">
               Pesanan ini menggunakan kode referral: <span className="font-mono font-bold">{order.affiliate_id}</span>
             </p>
           </div>
@@ -288,20 +318,20 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Notes Section */}
       {order.customer_info.notes && (
-        <div className="mb-8 page-break-avoid">
-          <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-            <h4 className="font-medium text-yellow-800 mb-2">Catatan Pesanan:</h4>
-            <p className="text-yellow-700">{order.customer_info.notes}</p>
+        <div className="mb-4 page-break-avoid invoice-section">
+          <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+            <h4 className="font-medium text-yellow-800 mb-1 text-sm">Catatan Pesanan:</h4>
+            <p className="text-yellow-700 text-xs">{order.customer_info.notes}</p>
           </div>
         </div>
       )}
 
       {/* Footer */}
-      <div className="border-t border-gray-200 pt-6 text-center page-break-avoid">
-        <p className="text-gray-600 mb-2">
+      <div className="border-t border-gray-200 pt-3 text-center page-break-avoid invoice-footer">
+        <p className="text-gray-600 mb-1 text-xs">
           Terima kasih telah berbelanja di Injapan Food!
         </p>
-        <p className="text-gray-600 mb-4">
+        <p className="text-gray-600 mb-2 text-xs">
           Untuk pertanyaan lebih lanjut, hubungi kami melalui WhatsApp: +817084894699
         </p>
         <div className="text-xs text-gray-500">
