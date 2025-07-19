@@ -20,17 +20,17 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
     let canvas;
     try {
       canvas = await html2canvas(element, {
-        scale: 1.5, // Balanced resolution for better performance
+        scale: 1.2, // Reduced scale for better performance and smaller size
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: Math.min(element.scrollWidth, 794), // A4 width in pixels at 96 DPI
-        height: Math.min(element.scrollHeight, 1123), // A4 height in pixels at 96 DPI
+        width: Math.min(element.scrollWidth, 750), // Slightly smaller width
+        height: Math.min(element.scrollHeight, 1000), // Reduced height to fit A4
         scrollX: 0,
         scrollY: 0,
-        windowWidth: 794,
-        windowHeight: 1123
+        windowWidth: 750,
+        windowHeight: 1000
       });
     } catch (canvasError) {
       console.error('Error creating canvas:', canvasError);
@@ -49,8 +49,8 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
     let imgHeight = (canvas.height * imgWidth) / canvas.width;
     
     // If image height exceeds A4 height, scale it down
-    if (imgHeight > pdfHeight - 20) { // Leave 20mm margin
-      imgHeight = pdfHeight - 20;
+    if (imgHeight > pdfHeight - 15) { // Leave 15mm margin
+      imgHeight = pdfHeight - 15;
     }
     
     // Create PDF and add content with error handling
@@ -94,8 +94,8 @@ export const generateInvoicePDF = async (element: HTMLElement | null, invoiceNum
         
           // Add logo to PDF
           const logoData = logoCanvas.toDataURL('image/png');
-          const logoWidth = 20; // in mm
-          const logoHeight = 20; // in mm
+          const logoWidth = 15; // Smaller logo in mm
+          const logoHeight = 15; // Smaller logo in mm
           const logoX = (pdfWidth - logoWidth) / 2; // Center horizontally
           pdf.addImage(logoData, 'PNG', logoX, 10, logoWidth, logoHeight);
         } catch (logoError) {

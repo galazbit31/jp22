@@ -24,14 +24,19 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
           @media print {
             @page {
               size: A4;
-              margin: 10mm;
+              margin: 8mm;
             }
             body {
               margin: 0;
               padding: 0;
-              font-size: 11px;
+              font-size: 10px;
               font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-              line-height: 1.3;
+              line-height: 1.2;
+              background-color: white !important;
+              color: black !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             .print-container {
               width: 100%;
@@ -41,7 +46,10 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
               box-shadow: none;
               background-color: white !important;
               color: black !important;
-              font-size: 11px;
+              font-size: 10px;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
             }
             .page-break-avoid {
               page-break-inside: avoid;
@@ -50,29 +58,33 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
             table {
               page-break-inside: avoid;
               break-inside: avoid;
-              font-size: 10px;
+              font-size: 9px;
+              width: 100% !important;
+              table-layout: fixed;
             }
             tr {
               page-break-inside: avoid;
               break-inside: avoid;
             }
             .invoice-header {
-              margin-bottom: 15px;
+              margin-bottom: 8px;
+              height: auto;
             }
             .invoice-section {
-              margin-bottom: 12px;
+              margin-bottom: 6px;
             }
             .invoice-table {
-              font-size: 9px;
+              font-size: 8px;
             }
             .invoice-footer {
-              margin-top: 15px;
-              font-size: 9px;
+              margin-top: 8px;
+              font-size: 8px;
             }
             * {
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
               color-adjust: exact !important;
+              background-color: transparent !important;
             }
             img {
               max-width: 100% !important;
@@ -80,40 +92,108 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
               display: block !important;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
+              color-adjust: exact !important;
+              opacity: 1 !important;
+              visibility: visible !important;
+            }
+            .logo-container {
+              width: 40px !important;
+              height: 40px !important;
+              max-width: 40px !important;
+              max-height: 40px !important;
+            }
+            .logo-container img {
+              width: 40px !important;
+              height: 40px !important;
+              max-width: 40px !important;
+              max-height: 40px !important;
+              object-fit: contain !important;
+            }
+            .header-section {
+              display: flex !important;
+              align-items: center !important;
+              margin-bottom: 8px !important;
+            }
+            .company-info {
+              margin-left: 8px !important;
+            }
+            .company-info h1 {
+              font-size: 14px !important;
+              margin: 0 !important;
+              line-height: 1.2 !important;
+            }
+            .company-info p {
+              font-size: 9px !important;
+              margin: 0 !important;
+            }
+            .invoice-title {
+              font-size: 16px !important;
+              margin: 0 !important;
+            }
+            .grid-cols-2 {
+              display: grid !important;
+              grid-template-columns: 1fr 1fr !important;
+              gap: 8px !important;
+            }
+            .info-card {
+              padding: 6px !important;
+              margin-bottom: 6px !important;
+              border: 1px solid #e5e7eb !important;
+              border-radius: 4px !important;
+              background-color: #f9fafb !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
+            .info-card h3 {
+              font-size: 10px !important;
+              margin-bottom: 4px !important;
+              font-weight: 600 !important;
+            }
+            .info-card .space-y-1 > * + * {
+              margin-top: 2px !important;
+            }
+            .contact-info {
+              font-size: 8px !important;
+              margin-bottom: 6px !important;
+              padding-bottom: 4px !important;
+              border-bottom: 1px solid #e5e7eb !important;
             }
           }
         `}
       </style>
 
       {/* Header with Logo and Title */}
-      <div className="flex justify-between items-center border-b-2 border-gray-200 pb-3 mb-4 page-break-avoid invoice-header">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-full overflow-hidden">
+      <div className="flex justify-between items-center border-b-2 border-gray-200 pb-2 mb-3 page-break-avoid invoice-header">
+        <div className="flex items-center space-x-3 header-section">
+          <div className="logo-container w-10 h-10 rounded-full overflow-hidden">
             <img 
               src="/logo.png" 
               alt="Injapan Food Logo" 
-              className="w-full h-full object-contain bg-white p-0.5"
+              className="w-full h-full object-contain bg-white p-0.5 logo-image"
               style={{ 
                 maxWidth: '100%', 
                 height: 'auto',
                 display: 'block',
                 WebkitPrintColorAdjust: 'exact',
-                printColorAdjust: 'exact'
+                printColorAdjust: 'exact',
+                colorAdjust: 'exact',
+                opacity: 1,
+                visibility: 'visible'
               }}
             />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Injapan Food</h1>
-            <p className="text-sm text-gray-600">Makanan Indonesia di Jepang</p>
+          <div className="company-info">
+            <h1 className="text-lg font-bold text-gray-900">Injapan Food</h1>
+            <p className="text-xs text-gray-600">Makanan Indonesia di Jepang</p>
           </div>
         </div>
         <div className="text-right">
-          <h2 className="text-2xl font-bold text-red-600">INVOICE</h2>
+          <h2 className="text-xl font-bold text-red-600 invoice-title">INVOICE</h2>
         </div>
       </div>
 
       {/* Contact Information */}
-      <div className="flex justify-between text-xs text-gray-600 mb-4 border-b pb-2 invoice-section">
+      <div className="flex justify-between text-xs text-gray-600 mb-3 border-b pb-2 invoice-section contact-info">
         <div className="flex items-center space-x-2">
           <span>📱 WhatsApp: +817084894699</span>
         </div>
@@ -123,8 +203,8 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
       </div>
 
       {/* Invoice and Customer Info */}
-      <div className="grid grid-cols-2 gap-4 mb-4 page-break-avoid invoice-section">
-        <div className="bg-gray-50 p-3 rounded-lg">
+      <div className="grid grid-cols-2 gap-3 mb-3 page-break-avoid invoice-section">
+        <div className="bg-gray-50 p-2 rounded-lg info-card">
           <h3 className="text-base font-semibold text-gray-900 mb-2">Informasi Invoice</h3>
           <div className="space-y-1 text-xs">
             <div className="flex justify-between">
@@ -176,7 +256,7 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
           </div>
         </div>
 
-        <div className="bg-gray-50 p-3 rounded-lg">
+        <div className="bg-gray-50 p-2 rounded-lg info-card">
           <h3 className="text-base font-semibold text-gray-900 mb-2">Informasi Penerima</h3>
           <div className="space-y-1 text-xs">
             <div className="flex justify-between">
@@ -208,9 +288,9 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
       </div>
 
       {/* Items Table */}
-      <div className="mb-4 page-break-avoid invoice-section">
+      <div className="mb-3 page-break-avoid invoice-section">
         <h3 className="text-base font-semibold text-gray-900 mb-2">Detail Pesanan</h3>
-        <table className="w-full border-collapse invoice-table">
+        <table className="w-full border-collapse invoice-table" style={{ tableLayout: 'fixed' }}>
           <thead>
             <tr className="bg-gray-50">
               <th className="border border-gray-300 px-2 py-1 text-left font-semibold text-xs">No.</th>
@@ -246,7 +326,7 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
       </div>
 
       {/* Total Section */}
-      <div className="flex justify-end mb-4 page-break-avoid invoice-section">
+      <div className="flex justify-end mb-3 page-break-avoid invoice-section">
         <div className="w-48">
           <div className="bg-gray-50 p-3 rounded-lg border">
             <div className="space-y-1 text-xs">
@@ -271,7 +351,7 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Payment Method Information */}
       {order.customer_info.payment_method && (
-        <div className="mb-4 page-break-avoid invoice-section">
+        <div className="mb-3 page-break-avoid invoice-section">
           <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
             <h4 className="font-medium text-blue-800 mb-1 text-sm">Informasi Pembayaran:</h4>
             <p className="text-blue-700 font-medium text-xs">{order.customer_info.payment_method}</p>
@@ -306,7 +386,7 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Affiliate Information (if available) */}
       {order.affiliate_id && (
-        <div className="mb-4 page-break-avoid invoice-section">
+        <div className="mb-3 page-break-avoid invoice-section">
           <div className="bg-green-50 p-3 rounded-lg border border-green-200">
             <h4 className="font-medium text-green-800 mb-1 text-sm">Informasi Referral:</h4>
             <p className="text-green-700 text-xs">
@@ -318,7 +398,7 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Notes Section */}
       {order.customer_info.notes && (
-        <div className="mb-4 page-break-avoid invoice-section">
+        <div className="mb-3 page-break-avoid invoice-section">
           <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
             <h4 className="font-medium text-yellow-800 mb-1 text-sm">Catatan Pesanan:</h4>
             <p className="text-yellow-700 text-xs">{order.customer_info.notes}</p>
@@ -328,13 +408,13 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
 
       {/* Footer */}
       <div className="border-t border-gray-200 pt-3 text-center page-break-avoid invoice-footer">
-        <p className="text-gray-600 mb-1 text-xs">
+        <p className="text-gray-600 mb-1 text-xs" style={{ fontSize: '8px' }}>
           Terima kasih telah berbelanja di Injapan Food!
         </p>
-        <p className="text-gray-600 mb-2 text-xs">
+        <p className="text-gray-600 mb-2 text-xs" style={{ fontSize: '8px' }}>
           Untuk pertanyaan lebih lanjut, hubungi kami melalui WhatsApp: +817084894699
         </p>
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500" style={{ fontSize: '7px' }}>
           <p>Invoice ini dibuat secara otomatis oleh sistem Injapan Food</p>
           <p>
             Dicetak pada: {new Date().toLocaleDateString('id-ID', {
