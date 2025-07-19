@@ -48,7 +48,7 @@ service cloud.firestore {
     
     // Allow authenticated users to access recycle bin with full permissions
     match /recycle_bin/{itemId} {
-      allow write, create, update, delete: if request.auth != null;
+      allow read, list, write, create, update, delete: if request.auth != null && isAdmin();
     }
     
     // Allow authenticated users to manage admin logs
