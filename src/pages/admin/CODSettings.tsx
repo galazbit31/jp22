@@ -193,7 +193,7 @@ const CODSettings = () => {
                         <span>¥2,000</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Ongkos Kirim (Tokyo):</span>
+                        <span>Ongkos Kirim (Nagano):</span>
                         <span>¥500</span>
                       </div>
                       {form.watch('isEnabled') && (
