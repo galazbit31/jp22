@@ -56,6 +56,7 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
   const [visitorId, setVisitorId] = useState<string | null>(null);
 
   // Get affiliate_id only if there's an active referral session
+  const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
     defaultValues: {
       fullName: '',
@@ -99,9 +100,12 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
         const storedAffiliateId = getStoredReferralCode();
         console.log('Found affiliate ID in localStorage:', storedAffiliateId);
         setAffiliateId(storedAffiliateId);
-      } else if (storedAffiliateId && !isReferralCodeValid()) {
-        console.log('No active referral session - user accessed directly');
-        setAffiliateId(null);
+      } else {
+        const storedAffiliateId = getStoredReferralCode();
+        if (storedAffiliateId && !hasActiveReferralSession()) {
+          console.log('No active referral session - user accessed directly');
+          setAffiliateId(null);
+        }
       }
     });
     
@@ -633,4 +637,4 @@ Mohon konfirmasi pesanan saya. Terima kasih banyak!`;
       </Form>
     </div>
   );
-};
+}
