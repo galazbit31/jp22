@@ -338,6 +338,12 @@ const Invoice = ({ order, invoiceNumber }: InvoiceProps) => {
                 <span>Ongkos Kirim:</span>
                 <span>{order.shipping_fee ? formatPrice(order.shipping_fee) : 'Akan dikonfirmasi'}</span>
               </div>
+              {order.cod_surcharge && order.cod_surcharge > 0 && (
+                <div className="flex justify-between">
+                  <span>Biaya Tambahan COD:</span>
+                  <span>{formatPrice(order.cod_surcharge)}</span>
+                </div>
+              )}
               <div className="border-t pt-1 mt-1">
                 <div className="flex justify-between text-sm font-bold text-red-600">
                   <span>Total Belanja:</span>

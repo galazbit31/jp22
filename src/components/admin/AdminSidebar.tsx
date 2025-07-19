@@ -72,6 +72,12 @@ const AdminSidebar = () => {
       icon: Truck,
     },
     {
+      title: 'Pengaturan COD',
+      href: '/admin/cod-settings',
+      icon: CreditCard,
+      description: 'Biaya tambahan COD'
+    },
+    {
       title: 'Program Affiliate',
       href: '/admin/affiliate',
       icon: Percent,

@@ -45,6 +45,7 @@ export interface Order {
   shipping_fee?: number; // Added shipping fee field
   affiliate_id?: string; // Added affiliate ID field
   visitor_id?: string; // Added visitor ID field for tracking
+  cod_surcharge?: number; // Added COD surcharge field
 }
 
 export interface OrderItem {

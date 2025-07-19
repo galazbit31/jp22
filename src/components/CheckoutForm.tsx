@@ -17,6 +17,8 @@ import { useShippingRateByPrefecture } from '@/hooks/useShippingRates';
 import { useCurrencyConverter } from '@/hooks/useCurrencyConverter';
 import { useLanguage } from '@/hooks/useLanguage';
 import PaymentMethodInfo from '@/components/PaymentMethodInfo'; 
+import { useCODSettings } from '@/hooks/useCODSettings';
+import { calculateTotalWithCOD } from '@/services/codSurchargeService';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/config/firebase';
 
@@ -54,6 +56,7 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
   const [showCurrencyInfo, setShowCurrencyInfo] = useState(false);
   const [affiliateId, setAffiliateId] = useState<string | null>(null);
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const { data: codSettings } = useCODSettings();
 
   // Get affiliate_id only if there's an active referral session
   const form = useForm<CheckoutFormData>({
@@ -74,8 +77,11 @@ export default function CheckoutForm({ cart, total, onOrderComplete }: CheckoutF
   // Get the current payment method
   const paymentMethod = form.watch('paymentMethod');
   
-  // Calculate total with shipping
-  const totalWithShipping = total + (shippingFee || 0);
+  // Calculate total with shipping and COD surcharge
+  const codSurcharge = (paymentMethod === 'COD (Cash on Delivery)' && codSettings?.isEnabled) 
+    ? codSettings.surchargeAmount 
+    : 0;
+  const totalWithShipping = total + (shippingFee || 0) + codSurcharge;
 
   // Move the currency converter hook to the top level
   const { convertedRupiah, lastUpdated } = useCurrencyConverter(totalWithShipping, paymentMethod);
@@ -605,6 +611,14 @@ Mohon konfirmasi pesanan saya. Terima kasih banyak!`;
               )}
             </div>
             
+            {/* COD Surcharge */}
+            {paymentMethod === 'COD (Cash on Delivery)' && codSettings?.isEnabled && codSurcharge > 0 && (
+              <div className="flex justify-between items-center text-orange-600">
+                <span className="font-medium">Biaya Tambahan COD:</span>
+                <span>¥{codSurcharge.toLocaleString()}</span>
+              </div>
+            )}
+            
             <div className="flex justify-between items-center pt-2 mt-2 text-lg font-bold">
               <span>{t('cart.total')}</span>
               <span className="text-primary">¥{totalWithShipping.toLocaleString()}</span>
@@ -629,6 +643,15 @@ Mohon konfirmasi pesanan saya. Terima kasih banyak!`;
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-700">
                   {t('checkout.shippingNotConfigured')}
+                </p>
+              </div>
+            )}
+            
+            {/* COD Information */}
+            {paymentMethod === 'COD (Cash on Delivery)' && codSettings?.isEnabled && codSurcharge > 0 && (
+              <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                <p className="text-sm text-orange-700">
+                  <strong>Informasi COD:</strong> Biaya tambahan ¥{codSurcharge.toLocaleString()} akan dikenakan untuk pembayaran COD.
                 </p>
               </div>
             )}

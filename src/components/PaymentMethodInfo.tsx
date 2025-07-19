@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCurrencyConverter } from '@/hooks/useCurrencyConverter';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useCODSettings } from '@/hooks/useCODSettings';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { CreditCard, RefreshCw, QrCode, Info, ArrowRight, AlertCircle } from 'lucide-react';
@@ -14,6 +15,7 @@ interface PaymentMethodInfoProps {
 const PaymentMethodInfo = ({ paymentMethod, totalAmount }: PaymentMethodInfoProps) => {
   const { convertedRupiah, isLoading, error, refreshRate, lastUpdated, isRefreshing } = useCurrencyConverter(totalAmount, paymentMethod);
   const { t } = useLanguage();
+  const { data: codSettings } = useCODSettings();
   const [showRefreshAnimation, setShowRefreshAnimation] = useState(false);
 
   const handleRefreshRate = () => {
@@ -245,6 +247,25 @@ const PaymentMethodInfo = ({ paymentMethod, totalAmount }: PaymentMethodInfoProp
       {renderHeader()}
       {renderPaymentAmount()}
       
+      {/* COD Surcharge Information */}
+      {codSettings?.isEnabled && codSettings.surchargeAmount > 0 && (
+        <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 mb-4">
+          <h4 className="font-medium text-orange-800 mb-2 flex items-center">
+            <Info className="w-4 h-4 mr-2" />
+            Biaya Tambahan COD
+          </h4>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-orange-700">Biaya Tambahan COD:</span>
+              <span className="font-bold text-orange-800">¥{codSettings.surchargeAmount.toLocaleString()}</span>
+            </div>
+            <p className="text-sm text-orange-700">
+              {codSettings.description}
+            </p>
+          </div>
+        </div>
+      )}
+      
       <div className="bg-green-50 p-4 rounded-lg border border-green-100">
         <div className="flex items-start space-x-3">
           <Info className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
@@ -253,6 +274,11 @@ const PaymentMethodInfo = ({ paymentMethod, totalAmount }: PaymentMethodInfoProp
             <p className="text-sm text-green-700">
               {t('checkout.codMessage')}
             </p>
+            {codSettings?.isEnabled && codSettings.surchargeAmount > 0 && (
+              <p className="text-sm text-green-700 mt-2">
+                <strong>Catatan:</strong> Biaya tambahan ¥{codSettings.surchargeAmount.toLocaleString()} sudah termasuk dalam total di atas.
+              </p>
+            )}
           </div>
         </div>
       </div>

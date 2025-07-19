@@ -14,6 +14,7 @@ import {
 import { db } from '@/config/firebase';
 import { Order } from '@/types';
 import { createOrUpdateAffiliateUser, getAffiliateByReferralCode, createOrderWithReferral } from '@/services/affiliateService';
+import { getCODSettings } from '@/services/codSurchargeService';
 
 const ORDERS_COLLECTION = 'orders';
 
@@ -157,14 +158,24 @@ export const createOrder = async (orderData: {
   try {
     console.log('Creating order with data:', orderData);
     
+    // Get COD settings to calculate surcharge
+    const codSettings = await getCODSettings();
+    const isCOD = orderData.customer_info.payment_method === 'COD (Cash on Delivery)';
+    const codSurcharge = (isCOD && codSettings.isEnabled) ? codSettings.surchargeAmount : 0;
+    
+    // Add COD surcharge to total price if applicable
+    const finalTotalPrice = orderData.total_price + codSurcharge;
+    
     // Ensure we're not passing undefined values to Firestore
     const sanitizedOrderData = {
       ...orderData,
+      total_price: finalTotalPrice,
       user_id: orderData.user_id || null, // Convert undefined to null
       shipping_fee: orderData.shipping_fee || 0,
       payment_proof_url: orderData.payment_proof_url || null,
       affiliate_id: orderData.affiliate_id || null,
-      visitor_id: orderData.visitor_id || null
+      visitor_id: orderData.visitor_id || null,
+      cod_surcharge: codSurcharge
     };
     
     // Only use affiliate_id if explicitly provided (from active session)
@@ -193,6 +204,7 @@ export const createOrder = async (orderData: {
       status: sanitizedOrderData.status || 'pending',
       payment_status: payment_status,
       shipping_fee: sanitizedOrderData.shipping_fee,
+      cod_surcharge: sanitizedOrderData.cod_surcharge,
       payment_proof_url: sanitizedOrderData.payment_proof_url,
       affiliate_id: affiliate_id,
       visitor_id: sanitizedOrderData.visitor_id,
