@@ -141,6 +141,20 @@ const BannerManagement = () => {
         return;
       }
 
+      // Debug: Log current user email
+      console.log('Current user email:', user.email);
+      console.log('User auth token claims:', await user.getIdTokenResult());
+      
+      // Check if user email is in admin list
+      const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
+      if (!user.email || !adminEmails.includes(user.email)) {
+        toast({
+          title: "Error Akses Admin",
+          description: `Email Anda (${user.email}) tidak terdaftar sebagai admin. Hubungi administrator untuk mendapatkan akses.`,
+          variant: "destructive"
+        });
+        return;
+      }
       // Upload image first
       const imageUrl = await uploadImage.mutateAsync(imageFile);
       
@@ -167,7 +181,7 @@ const BannerManagement = () => {
       if (error instanceof Error && error.message.includes('storage/unauthorized')) {
         toast({
           title: "Error Akses",
-          description: "Anda tidak memiliki izin untuk mengunggah gambar. Pastikan Anda login sebagai admin yang terdaftar.",
+          description: `Akses ditolak. Email Anda (${auth.currentUser?.email}) tidak memiliki izin admin untuk mengunggah gambar. Pastikan Anda login dengan email admin yang terdaftar.`,
           variant: "destructive"
         });
       } else {
@@ -205,6 +219,16 @@ const BannerManagement = () => {
         return;
       }
 
+      // Check if user email is in admin list
+      const adminEmails = ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
+      if (!user.email || !adminEmails.includes(user.email)) {
+        toast({
+          title: "Error Akses Admin",
+          description: `Email Anda (${user.email}) tidak terdaftar sebagai admin. Hubungi administrator untuk mendapatkan akses.`,
+          variant: "destructive"
+        });
+        return;
+      }
       let imageUrl = selectedBanner.image_url;
       
       // Upload new image if provided
@@ -238,7 +262,7 @@ const BannerManagement = () => {
       if (error instanceof Error && error.message.includes('storage/unauthorized')) {
         toast({
           title: "Error Akses",
-          description: "Anda tidak memiliki izin untuk mengunggah gambar. Pastikan Anda login sebagai admin yang terdaftar.",
+          description: `Akses ditolak. Email Anda (${auth.currentUser?.email}) tidak memiliki izin admin untuk mengunggah gambar. Pastikan Anda login dengan email admin yang terdaftar.`,
           variant: "destructive"
         });
       } else {
