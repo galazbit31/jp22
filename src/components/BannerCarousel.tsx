@@ -151,3 +151,7 @@ const BannerCarousel = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+export default BannerCarousel;
