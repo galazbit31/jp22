@@ -251,56 +251,6 @@ const BannerManagement = () => {
     }
   };
 
-  const handleEditBanner = async () => {
-    if (!selectedBanner) return;
-
-    // Check active banner limit when activating
-    if (formData.is_active && !selectedBanner.is_active && activeBannersCount >= 5) {
-      toast({
-        title: "Error",
-        description: "Maksimal 5 banner aktif diperbolehkan",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      let imageUrl = selectedBanner.image_url;
-      
-      // Upload new image if provided
-      if (imageFile) {
-        imageUrl = await uploadImage.mutateAsync(imageFile);
-      }
-
-      // Update banner
-      await updateBanner.mutateAsync({
-        id: selectedBanner.id,
-        updates: {
-          image_url: imageUrl,
-          link_url: formData.link_url || undefined,
-          order: formData.order,
-          is_active: formData.is_active
-        }
-      });
-
-      toast({
-        title: "Berhasil",
-        description: "Banner berhasil diperbarui",
-      });
-
-      setIsEditDialogOpen(false);
-      resetForm();
-      refetch();
-    } catch (error) {
-      console.error('Error updating banner:', error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Gagal memperbarui banner",
-        variant: "destructive"
-      });
-    }
-  };
-
   const handleDeleteBanner = async (id: string) => {
     try {
       await deleteBanner.mutateAsync(id);
