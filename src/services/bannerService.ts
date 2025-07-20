@@ -26,17 +26,19 @@ const STORAGE_FOLDER = 'banner-images';
 export const getActiveBanners = async (): Promise<Banner[]> => {
   try {
     const bannersRef = collection(db, BANNERS_COLLECTION);
-    const q = query(
-      bannersRef,
-      where('is_active', '==', true),
-      orderBy('order', 'asc')
-    );
-    const snapshot = await getDocs(q);
+    // First get all banners, then filter and sort on client side
+    // This avoids the need for composite index
+    const snapshot = await getDocs(bannersRef);
     
-    return snapshot.docs.map(doc => ({
+    const allBanners = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     } as Banner));
+    
+    // Filter active banners and sort by order
+    return allBanners
+      .filter(banner => banner.is_active === true)
+      .sort((a, b) => (a.order || 0) - (b.order || 0));
   } catch (error) {
     console.error('Error fetching active banners:', error);
     throw error;
