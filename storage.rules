@@ -10,7 +10,7 @@ service firebase.storage {
     // Banner images - Public read, any authenticated user can write (temporary fix)
     match /banner-images/{allPaths=**} {
       allow read: if true;
-      allow write, create, update, delete: if true; // Temporarily allow all operations
+      allow write, create, update, delete: if isAdmin();
     }
     
     // Payment proofs - Users can upload their own, admins can manage all
