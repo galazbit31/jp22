@@ -3,6 +3,7 @@ import {
   LayoutDashboard, 
   Package,
   Tags,
+  Image,
   ShoppingCart, 
   Users, 
   CheckCircle,
@@ -55,6 +56,12 @@ const AdminSidebar = () => {
       href: '/admin/categories',
       icon: Tags,
       description: 'Kelola kategori produk'
+    },
+    {
+      title: 'Manajemen Banner',
+      href: '/admin/banners',
+      icon: Image,
+      description: 'Kelola banner beranda'
     },
     {
       title: 'Riwayat Pesanan',

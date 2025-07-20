@@ -224,3 +224,22 @@ export interface POSTransaction {
   cashierId: string;
   cashierName: string;
 }
+
+export interface CODSettings {
+  surchargeAmount: number;
+  isEnabled: boolean;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Banner interface
+export interface Banner {
+  id: string;
+  image_url: string;
+  link_url?: string;
+  order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}

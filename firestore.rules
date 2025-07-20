@@ -103,6 +103,12 @@ service cloud.firestore {
       allow write, create, update, delete: if request.auth != null && isAdmin();
     }
     
+    // Banners - Public read for active banners, admin write
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write, create, update, delete: if request.auth != null && isAdmin();
+    }
+    
     // Helper function to check if user is admin
     function isAdmin() {
       return request.auth != null && 

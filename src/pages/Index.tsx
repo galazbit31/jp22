@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import BannerCarousel from '@/components/BannerCarousel';
 import { useProducts } from '@/hooks/useProducts';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useQuery } from '@tanstack/react-query';
@@ -155,6 +156,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Banner Carousel Section */}
+      <BannerCarousel />
 
       {/* Categories Section */}
       <section className="py-12 sm:py-16 bg-gray-50 w-full">

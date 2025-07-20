@@ -24,6 +24,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import EnhancedAdminDashboard from '@/pages/admin/EnhancedAdminDashboard';
 import ProductsList from '@/pages/admin/ProductsList';
 import CategoryManagement from '@/pages/admin/CategoryManagement';
+import BannerManagement from '@/pages/admin/BannerManagement';
 import AddProduct from '@/pages/admin/AddProduct';
 import EditProduct from '@/pages/admin/EditProduct';
 import OrdersHistory from '@/pages/admin/OrdersHistory';
@@ -115,6 +116,7 @@ function App() {
             <Route path="/admin/enhanced" element={<EnhancedAdminDashboard />} />
             <Route path="/admin/products" element={<ProductsList />} />
             <Route path="/admin/categories" element={<CategoryManagement />} />
+            <Route path="/admin/banners" element={<BannerManagement />} />
             <Route path="/admin/add-product" element={<AddProduct />} />
             <Route path="/admin/edit-product/:id" element={<EditProduct />} />
             <Route path="/admin/products/edit/:id" element={<EditProduct />} />
