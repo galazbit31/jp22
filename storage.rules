@@ -29,11 +29,7 @@ service firebase.storage {
     // Helper functions
     function isAdmin() {
       return request.auth != null && 
-        (request.auth.token.email == 'admin@gmail.com' || 
-         request.auth.token.email == 'ari4rich@gmail.com' ||
-         request.auth.token.email == 'newadmin@gmail.com' ||
-         request.auth.token.email == 'injpn@food.com' ||
-         request.auth.token.email == 'admin2@gmail.com');
+        request.auth.token.email in ['admin@gmail.com', 'ari4rich@gmail.com', 'newadmin@gmail.com', 'injpn@food.com', 'admin2@gmail.com'];
     }
     
     function isOwner() {

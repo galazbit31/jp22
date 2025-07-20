@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, Image, ExternalLink, AlertTriangle, Upload, X } from 'lucide-react';
 import { Banner } from '@/types';
+import { auth } from '@/config/firebase';
 
 const BannerManagement = () => {
   const { data: banners = [], isLoading, refetch } = useBanners();
@@ -129,6 +130,17 @@ const BannerManagement = () => {
     }
 
     try {
+      // Check if user is authenticated
+      const user = auth.currentUser;
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Anda harus login sebagai admin untuk mengunggah banner",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Upload image first
       const imageUrl = await uploadImage.mutateAsync(imageFile);
       
@@ -150,11 +162,92 @@ const BannerManagement = () => {
       refetch();
     } catch (error) {
       console.error('Error adding banner:', error);
+      
+      // Handle specific storage permission error
+      if (error instanceof Error && error.message.includes('storage/unauthorized')) {
+        toast({
+          title: "Error Akses",
+          description: "Anda tidak memiliki izin untuk mengunggah gambar. Pastikan Anda login sebagai admin yang terdaftar.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Gagal menambahkan banner",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleEditBanner = async () => {
+    if (!selectedBanner) return;
+
+    // Check active banner limit when activating
+    if (formData.is_active && !selectedBanner.is_active && activeBannersCount >= 5) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Gagal menambahkan banner",
+        description: "Maksimal 5 banner aktif diperbolehkan",
         variant: "destructive"
       });
+      return;
+    }
+
+    try {
+      // Check if user is authenticated
+      const user = auth.currentUser;
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Anda harus login sebagai admin untuk memperbarui banner",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      let imageUrl = selectedBanner.image_url;
+      
+      // Upload new image if provided
+      if (imageFile) {
+        imageUrl = await uploadImage.mutateAsync(imageFile);
+      }
+
+      // Update banner
+      await updateBanner.mutateAsync({
+        id: selectedBanner.id,
+        updates: {
+          image_url: imageUrl,
+          link_url: formData.link_url || undefined,
+          order: formData.order,
+          is_active: formData.is_active
+        }
+      });
+
+      toast({
+        title: "Berhasil",
+        description: "Banner berhasil diperbarui",
+      });
+
+      setIsEditDialogOpen(false);
+      resetForm();
+      refetch();
+    } catch (error) {
+      console.error('Error updating banner:', error);
+      
+      // Handle specific storage permission error
+      if (error instanceof Error && error.message.includes('storage/unauthorized')) {
+        toast({
+          title: "Error Akses",
+          description: "Anda tidak memiliki izin untuk mengunggah gambar. Pastikan Anda login sebagai admin yang terdaftar.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Gagal memperbarui banner",
+          variant: "destructive"
+        });
+      }
     }
   };
 
