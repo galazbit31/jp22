@@ -73,6 +73,9 @@ const BannerCarousel = () => {
                     className={`relative w-full h-64 md:h-80 lg:h-96 ${
                       banner.link_url ? 'cursor-pointer' : ''
                     }`}
+                    className={`relative w-full h-80 ${
+                      banner.link_url ? 'cursor-pointer' : ''
+                    }`}
                     onClick={() => handleBannerClick(banner)}
                   >
                     <img
