@@ -65,16 +65,32 @@ export const getAllBanners = async (): Promise<Banner[]> => {
 // Upload banner image to Firebase Storage
 export const uploadBannerImage = async (file: File): Promise<string> => {
   try {
+    console.log('Starting banner image upload...', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type
+    });
+    
     const fileExt = file.name.split('.').pop();
     const fileName = `banner_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
     const storageRef = ref(storage, `${STORAGE_FOLDER}/${fileName}`);
     
+    console.log('Uploading to storage path:', `${STORAGE_FOLDER}/${fileName}`);
+    
     await uploadBytes(storageRef, file);
+    console.log('Upload successful, getting download URL...');
+    
     const downloadURL = await getDownloadURL(storageRef);
+    console.log('Download URL obtained:', downloadURL);
     
     return downloadURL;
   } catch (error) {
     console.error('Error uploading banner image:', error);
+    console.error('Error details:', {
+      code: error?.code,
+      message: error?.message,
+      serverResponse: error?.serverResponse
+    });
     throw error;
   }
 };
