@@ -4,7 +4,7 @@ service firebase.storage {
     // Product images - Public read, authenticated admin write
     match /product-images/{allPaths=**} {
       allow read: if true;
-      allow write, create, update, delete: if request.auth != null && isAdmin();
+      allow write, create, update, delete: if request.auth != null;
     }
     
     // Payment proofs - Users can upload their own, admins can manage all
@@ -17,13 +17,13 @@ service firebase.storage {
     // Banner images - Public read, authenticated admin write
     match /banner-images/{allPaths=**} {
       allow read: if true;
-      allow write, create, update, delete: if request.auth != null && isAdmin();
+      allow write, create, update, delete: if request.auth != null;
     }
     
     // General uploads - Authenticated users only
     match /{allPaths=**} {
       allow read: if request.auth != null;
-      allow write, create, update, delete: if request.auth != null && isAdmin();
+      allow write, create, update, delete: if request.auth != null;
     }
     
     // Helper functions
