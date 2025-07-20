@@ -140,14 +140,6 @@ const BannerCarousel = () => {
             )}
           </div>
 
-          {/* Banner Counter */}
-          {banners.length > 1 && (
-            <div className="text-center mt-4">
-              <span className="text-sm text-gray-500">
-                {currentIndex + 1} dari {banners.length}
-              </span>
-            </div>
-          )}
         </div>
       </div>
     </section>
