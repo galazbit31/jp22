@@ -50,7 +50,7 @@ const ModernPayoutRequestForm = () => {
   const calculatedApprovedCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
   
   // Use calculated approved commission for consistency with stats display
-  const availableCommission = calculatedApprovedCommission;
+  const availableCommission = affiliate?.approvedCommission || 0;
   const truePendingCommission = calculatedPendingCommission;
     
   // State for currency conversion
