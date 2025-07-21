@@ -887,8 +887,8 @@ export const requestPayout = async (
     
     const affiliate = affiliateDoc.data() as AffiliateUser;
     
-    // Calculate available commission (total - pending)
-    const availableCommission = affiliate.totalCommission - affiliate.pendingCommission;
+    // Use approved commission as available commission
+    const availableCommission = affiliate.approvedCommission || 0;
     
     if (availableCommission < amount) {
       throw new Error('Insufficient available commission');
@@ -916,9 +916,8 @@ export const requestPayout = async (
     
     // Update affiliate stats
     await updateDoc(affiliateRef, {
-      // Increase pending commission by the requested amount
-      // This effectively reduces the available commission (total - pending)
-      pendingCommission: increment(amount),
+      // Decrease approved commission by the requested amount
+      approvedCommission: increment(-amount),
       updatedAt: new Date().toISOString()
     });
     
