@@ -139,7 +139,7 @@ const BannerCarousel = () => {
               </div>
             )}
           </div>
-
+        </div>
       </div>
     </section>
   );
