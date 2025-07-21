@@ -46,11 +46,10 @@ const ModernPayoutRequestForm = () => {
   const paidCommissions = commissions.filter(comm => comm.status === 'paid');
   
   const calculatedPendingCommission = pendingCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
-  const calculatedApprovedCommission = approvedCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
   const calculatedPaidCommission = paidCommissions.reduce((sum, comm) => sum + comm.commissionAmount, 0);
   
-  // Use calculated values for consistency with admin dashboard
-  const availableCommission = calculatedApprovedCommission;
+  // Use affiliate.approvedCommission for server-side alignment
+  const availableCommission = affiliate?.approvedCommission || 0;
   const truePendingCommission = calculatedPendingCommission;
     
   // State for currency conversion
