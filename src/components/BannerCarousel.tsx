@@ -55,11 +55,11 @@ const BannerCarousel = () => {
   }
 
   return (
-    <section className="w-full bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="relative max-w-6xl mx-auto">
+    <section className="w-full bg-gray-50">
+      <div className="w-full">
+        <div className="relative w-full">
           {/* Banner Container */}
-          <div className="relative overflow-hidden rounded-xl shadow-lg bg-white">
+          <div className="relative overflow-hidden bg-white">
             <div 
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -70,10 +70,7 @@ const BannerCarousel = () => {
                   className="w-full flex-shrink-0 relative"
                 >
                   <div
-                    className={`relative w-full h-64 md:h-80 lg:h-96 ${
-                      banner.link_url ? 'cursor-pointer' : ''
-                    }`}
-                    className={`relative w-full h-80 ${
+                    className={`relative w-full h-[300px] md:h-[400px] lg:h-[500px] ${
                       banner.link_url ? 'cursor-pointer' : ''
                     }`}
                     onClick={() => handleBannerClick(banner)}
@@ -90,7 +87,7 @@ const BannerCarousel = () => {
                     
                     {/* Click indicator for linked banners */}
                     {banner.link_url && (
-                      <div className="absolute top-4 right-4 bg-white bg-opacity-90 px-3 py-1 rounded-full text-xs font-medium text-gray-700">
+                      <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-white bg-opacity-90 px-2 py-1 md:px-3 md:py-1 rounded-full text-xs font-medium text-gray-700">
                         Klik untuk info lebih lanjut
                       </div>
                     )}
@@ -105,32 +102,32 @@ const BannerCarousel = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 rounded-full shadow-md"
+                  className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 rounded-full shadow-md w-8 h-8 md:w-10 md:h-10"
                   onClick={goToPrevious}
                   aria-label="Previous banner"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
                 </Button>
 
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 rounded-full shadow-md"
+                  className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 rounded-full shadow-md w-8 h-8 md:w-10 md:h-10"
                   onClick={goToNext}
                   aria-label="Next banner"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
                 </Button>
               </>
             )}
 
             {/* Dots Indicator */}
             {banners.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+              <div className="absolute bottom-2 md:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
                 {banners.map((_, index) => (
                   <button
                     key={index}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-all duration-300 ${
                       index === currentIndex
                         ? 'bg-white shadow-md'
                         : 'bg-white bg-opacity-50 hover:bg-opacity-75'
@@ -143,7 +140,6 @@ const BannerCarousel = () => {
             )}
           </div>
 
-        </div>
       </div>
     </section>
   );
